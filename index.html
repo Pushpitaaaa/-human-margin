@@ -1,0 +1,3012 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Human Margin: The Last Morning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Spline+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* The game is a night scene by design, so it does not switch with the viewer's theme. */
+:root{
+  --night:#0a1216;
+  --wall:#1a252d;
+  --lamp:#e6a85c;
+  --dawn:#8aa6c1;
+  --paper:#ece4d3;
+  --mimi:#f0c4b2;
+  --dim:#8a959e;
+  --rule:rgba(236,228,211,.26);
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  --sans:'Spline Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="light"]){color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;overflow:hidden;background:var(--night);color:var(--paper);
+  font-family:var(--serif);-webkit-font-smoothing:antialiased;
+}
+#app{position:fixed;inset:0;background:var(--night);overflow:hidden}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* film look */
+.grain{position:absolute;inset:-20%;pointer-events:none;opacity:.09;mix-blend-mode:overlay;
+  animation:grain 1.1s steps(6) infinite}
+@keyframes grain{
+  0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}
+  60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+.vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 38%,rgba(4,8,10,.82) 100%)}
+.bar{position:absolute;left:0;right:0;height:7vh;background:#000;pointer-events:none;z-index:3}
+.bar.top{top:0}.bar.bottom{bottom:0}
+.shade{position:absolute;left:0;right:0;bottom:0;height:46%;pointer-events:none;
+  background:linear-gradient(to top,rgba(4,8,10,.86),rgba(4,8,10,0));z-index:2}
+#fade{position:absolute;inset:0;background:#000;opacity:1;pointer-events:none;
+  transition:opacity 2s ease;z-index:4}
+
+/* screens */
+.screen{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;justify-content:center;
+  padding:0 max(2rem,7vw);opacity:0;pointer-events:none;transition:opacity 1.8s ease}
+.screen.on{opacity:1;pointer-events:auto}
+.screen.center{align-items:center;text-align:center}
+
+#gate{background:#000;cursor:pointer}
+#gate p{margin:0;font:400 .95rem var(--sans);color:var(--dim);letter-spacing:.02em}
+
+.logo-word{font:400 clamp(2.3rem,6.4vw,4.6rem)/1.05 var(--serif);font-variation-settings:"opsz" 72;
+  letter-spacing:.005em;opacity:0;transition:opacity 2.6s ease}
+.logo-rule{position:relative;height:1px;width:100%;margin-top:1.1rem;background:var(--paper);opacity:.7;
+  transform:scaleX(0);transform-origin:left;transition:transform 3.4s cubic-bezier(.2,.6,.2,1)}
+.logo-rule .dot{position:absolute;right:-4px;top:-3.5px;width:8px;height:8px;border-radius:50%;background:var(--lamp)}
+#logo .box{display:inline-block;max-width:min(92vw,46rem)}
+#logo.go .logo-word{opacity:1}
+#logo.go .logo-rule{transform:scaleX(1)}
+
+#memory p{margin:0;max-width:26em;font:italic 400 clamp(1.3rem,2.9vw,2rem)/1.5 var(--serif);
+  color:var(--paper);opacity:0;transition:opacity 3s ease}
+#memory.go p{opacity:1}
+
+/* profile */
+#profile{background:linear-gradient(90deg,rgba(6,10,13,.94) 0%,rgba(6,10,13,.86) 45%,rgba(6,10,13,.35) 100%);
+  overflow-y:auto;justify-content:flex-start;padding-top:calc(7vh + 2rem);padding-bottom:calc(7vh + 2rem)}
+.panel{width:min(29rem,100%);margin:auto 0}
+.panel h1{margin:0 0 .5rem;font:400 clamp(1.8rem,4vw,2.5rem)/1.1 var(--serif)}
+.panel .lede{margin:0 0 1.8rem;color:var(--dim);font:400 .95rem/1.55 var(--sans);max-width:30em}
+.field{margin:0 0 1.15rem}
+.field label,.field .lab{display:block;margin-bottom:.15rem;font:500 .82rem var(--sans);color:var(--dim)}
+.field input[type=text],.field input[type=number],.field input[type=date]{
+  width:100%;background:transparent;border:0;border-bottom:1px solid var(--rule);color:var(--paper);
+  font:400 1.35rem var(--serif);padding:.3rem 0;border-radius:0;color-scheme:dark}
+.field input:focus{outline:none;border-bottom-color:var(--lamp)}
+.field .hint{margin:.3rem 0 0;color:var(--dim);font:400 .78rem/1.4 var(--sans)}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+.seg{display:flex;gap:1.4rem}
+.seg button{background:none;border:0;border-bottom:2px solid transparent;color:var(--dim);
+  font:400 1.25rem var(--serif);padding:.2rem 0;cursor:pointer}
+.seg button[aria-pressed=true]{color:var(--paper);border-bottom-color:var(--lamp)}
+.seg button:focus-visible,.btn:focus-visible,.choice:focus-visible,#mute:focus-visible,.link:focus-visible{
+  outline:2px solid var(--lamp);outline-offset:4px}
+.err{min-height:1.3em;margin:.4rem 0 .6rem;color:#f0a58f;font:400 .88rem var(--sans)}
+.btn{background:none;border:1px solid var(--paper);color:var(--paper);padding:.7rem 1.4rem;
+  font:400 1.1rem var(--serif);cursor:pointer;transition:background .25s,color .25s,border-color .25s}
+.btn:hover{background:var(--paper);color:var(--night)}
+
+/* dialogue dock */
+#dock{position:absolute;left:max(2rem,7vw);bottom:calc(7vh + 1.6rem + env(safe-area-inset-bottom,0px));
+  width:min(31rem,86vw);z-index:5;pointer-events:none}
+#caption{min-height:4.6em;opacity:0;transition:opacity .5s ease;text-shadow:0 1px 14px rgba(0,0,0,.9)}
+#caption.on{opacity:1}
+#caption .tag{display:inline-block;margin-right:.6em;font:500 .8rem var(--sans);color:var(--dim)}
+#caption .tag[hidden]{display:none}
+#caption .body{font:400 clamp(1.15rem,2.1vw,1.5rem)/1.5 var(--serif);color:var(--paper)}
+#caption[data-who=narr] .body{font-style:italic;color:#d6cebd}
+#caption[data-who=mimi] .body{color:var(--mimi)}
+#caption .go{display:inline-block;width:6px;height:6px;margin-left:.55em;border-radius:50%;background:var(--lamp);
+  vertical-align:middle;opacity:0}
+#caption.ready .go{opacity:1;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+#choices{display:flex;flex-direction:column;gap:.15rem;margin-top:.9rem;pointer-events:auto}
+.choice{position:relative;text-align:left;background:none;border:0;border-left:2px solid var(--rule);
+  color:#cfc7b6;padding:.55rem 0 .55rem 1rem;font:400 clamp(1.05rem,1.9vw,1.25rem)/1.4 var(--serif);cursor:pointer;
+  opacity:0;transform:translateY(6px);transition:opacity .5s ease,transform .5s ease,border-color .25s,color .25s,padding .25s}
+.choice.in{opacity:1;transform:none}
+.choice:hover,.choice:focus-visible{border-left-color:var(--lamp);color:var(--paper);padding-left:1.25rem}
+.choice .n{display:inline-block;width:1.5em;color:var(--dim);font:500 .8rem var(--sans)}
+#choices.out .choice{opacity:0;transition:opacity .4s ease}
+
+#hint{position:absolute;right:max(1.2rem,3vw);bottom:calc(7vh + 1.2rem);z-index:5;color:var(--dim);
+  font:400 .8rem var(--sans);opacity:0;transition:opacity 1s ease;pointer-events:none}
+#hint.on{opacity:.9}
+#mute{position:absolute;bottom:calc(3.5vh - .75rem);right:max(1.2rem,3vw);z-index:7;
+  background:none;border:0;color:var(--dim);font:400 .85rem var(--sans);cursor:pointer;padding:.3rem .5rem;
+  opacity:0;transition:opacity 1s ease;pointer-events:none}
+#mute.on{opacity:1;pointer-events:auto}
+
+#end{background:linear-gradient(90deg,rgba(6,10,13,.92) 0%,rgba(6,10,13,.6) 55%,rgba(6,10,13,.1) 100%)}
+#end .panel{margin:auto 0}
+#end h2{margin:0 0 .8rem;font:400 clamp(1.8rem,4vw,2.6rem)/1.15 var(--serif)}
+#end p{margin:0 0 1rem;color:#cfc7b6;font:400 1.1rem/1.55 var(--serif);max-width:28em}
+.link{background:none;border:0;padding:0;color:var(--dim);font:400 .85rem var(--sans);text-decoration:underline;
+  cursor:pointer;margin-right:1.4rem}
+#scores{display:none;margin:1rem 0 0;color:var(--dim);font:400 .85rem/1.6 var(--sans)}
+#scores.on{display:block}
+
+
+#plan,#night,#pack{transition-duration:.3s}
+#callfx{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity 1s ease;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px)}
+#callfx.on{opacity:1}
+#tint{position:absolute;inset:0;background:rgba(214,122,52,.24);opacity:0;pointer-events:none;
+  transition:opacity 3s ease;z-index:1}
+#tint.on{opacity:1}
+#caption[data-who=hab] .body{color:#a9c6e0}
+#caption[data-who=official] .body{color:#ddd5c3}
+
+#letter{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;
+  padding:0 1rem 18vh;opacity:0;pointer-events:none;transition:opacity 1.4s ease}
+#letter.on{opacity:1}
+#letter .sheet{width:min(31rem,90vw);padding:1.9rem 2.1rem;background:#e7dfcd;color:#251d16;
+  transform:rotate(-1deg);box-shadow:0 24px 70px rgba(0,0,0,.65);
+  font:italic 400 clamp(1.05rem,2vw,1.3rem)/1.7 var(--serif);white-space:pre-line}
+
+#pack{background:linear-gradient(90deg,rgba(6,10,13,.95) 0%,rgba(6,10,13,.9) 52%,rgba(6,10,13,.25) 100%);overflow-y:auto;justify-content:flex-start;
+  padding-top:calc(7vh + 2rem);padding-bottom:calc(7vh + 2rem)}
+#pack .panel{width:min(38rem,100%);margin:0}
+.meter{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 .4rem;font:500 .9rem var(--sans);color:var(--dim)}
+.meter b{color:var(--paper);font:400 1.5rem var(--serif)}
+.gauge{height:2px;background:var(--rule);margin:0 0 1.2rem}
+.gauge span{display:block;height:100%;width:0;background:var(--lamp);transition:width .3s ease}
+.item{display:grid;grid-template-columns:1.4rem 1fr auto;gap:.9rem;align-items:start;width:100%;text-align:left;
+  background:none;border:0;border-top:1px solid var(--rule);padding:.8rem 0;color:var(--paper);cursor:pointer;font:inherit}
+.item:last-child{border-bottom:1px solid var(--rule)}
+.item .box{width:1rem;height:1rem;margin-top:.3rem;border:1.5px solid var(--dim)}
+.item[aria-checked=true] .box{background:var(--lamp);border-color:var(--lamp)}
+.item .nm{display:block;font:400 1.2rem/1.3 var(--serif)}
+.item .why{display:block;color:var(--dim);font:400 .85rem/1.4 var(--sans)}
+.item .kg{margin-top:.25rem;color:var(--dim);font:500 .9rem var(--sans)}
+.item[aria-disabled=true]{opacity:.36;cursor:not-allowed}
+.item:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+
+
+#caption[data-who=okafor] .body{color:#dccfae}
+#daycard{background:#000;transition:opacity 1.2s ease}
+#daycard .dcn{font:500 .95rem var(--sans);color:var(--dim);letter-spacing:.06em}
+#daycard .dct{margin-top:.4rem;font:400 clamp(2.2rem,6vw,4rem)/1.05 var(--serif)}
+.habeye{animation:eye 3.2s ease-in-out infinite}
+@keyframes eye{0%,100%{opacity:.55}50%{opacity:1}}
+
+#plan{overflow-y:auto;justify-content:flex-start;padding-top:calc(7vh + 1.4rem);padding-bottom:calc(7vh + 1.4rem);
+  background:linear-gradient(180deg,rgba(6,12,16,.9),rgba(6,12,16,.95))}
+#plan .wrap{display:grid;grid-template-columns:minmax(15rem,19rem) minmax(0,1fr);gap:2.6rem;width:100%;max-width:72rem;margin:0 auto}
+@media (max-width:860px){#plan .wrap{grid-template-columns:1fr;gap:1.4rem}}
+.hud{position:sticky;top:calc(7vh + 1rem);align-self:start}
+@media (max-width:860px){.hud{position:static}}
+.hud h2{margin:0 0 .2rem;font:400 clamp(1.5rem,3vw,2rem)/1.1 var(--serif)}
+.hud .sub{margin:0 0 1.2rem;color:var(--dim);font:400 .85rem/1.5 var(--sans)}
+.hud .sec{margin:1.3rem 0 .6rem;color:var(--dim);font:500 .78rem var(--sans);letter-spacing:.05em}
+.stat{margin:0 0 .85rem}
+.stat .top{display:flex;justify-content:space-between;align-items:baseline;font:500 .85rem var(--sans);color:var(--dim)}
+.stat .top b{font:400 1.35rem var(--serif);color:var(--paper)}
+.meter2{height:3px;background:var(--rule);margin-top:.25rem}
+.meter2 span{display:block;height:100%;background:var(--dawn);transition:width .3s ease}
+.meter2.low span{background:#f0a58f}
+.meter2.gold span{background:var(--lamp)}
+.twin{margin-top:1.2rem}
+.twin .btn{font-size:1rem;padding:.55rem 1rem}
+.twin .btn[disabled]{opacity:.4;cursor:not-allowed}
+.twin .out{margin:.9rem 0 0;color:#cfc7b6;font:400 .9rem/1.6 var(--sans)}
+.grp{margin:0 0 1.7rem}
+.grp h3{display:flex;justify-content:space-between;margin:0 0 .3rem;color:var(--dim);font:500 .82rem var(--sans)}
+.opt{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start;width:100%;text-align:left;background:none;border:0;
+  border-top:1px solid var(--rule);border-left:2px solid transparent;padding:.75rem 0 .75rem .8rem;color:var(--paper);cursor:pointer;font:inherit;
+  transition:border-color .2s,background .2s}
+.opt:last-child{border-bottom:1px solid var(--rule)}
+.opt:hover{background:rgba(236,228,211,.04)}
+.opt[aria-checked=true]{border-left-color:var(--lamp);background:rgba(230,168,92,.08)}
+.opt[aria-disabled=true]{opacity:.35;cursor:not-allowed}
+.opt:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+.opt .nm{display:block;font:400 1.15rem/1.3 var(--serif)}
+.opt .why{display:block;margin-top:.15rem;color:var(--dim);font:400 .84rem/1.45 var(--sans)}
+.opt .fxh{display:block;margin-top:.25rem;color:var(--dawn);font:500 .78rem var(--sans)}
+.opt .fxh.warn{color:#f0a58f}
+.opt .cost{color:#cfc7b6;font:500 .82rem/1.5 var(--sans);text-align:right;white-space:nowrap}
+.go-row{display:flex;align-items:center;gap:1.2rem;margin-top:.4rem}
+.go-row .hintline{color:var(--dim);font:400 .85rem var(--sans)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+#night{background:linear-gradient(90deg,rgba(6,10,13,.95) 0%,rgba(6,10,13,.88) 55%,rgba(6,10,13,.3) 100%);
+  overflow-y:auto;justify-content:flex-start;padding-top:calc(7vh + 2rem);padding-bottom:calc(7vh + 2rem)}
+#night .panel{width:min(34rem,100%);margin:0}
+.nrow{display:grid;grid-template-columns:1fr auto auto;gap:1.2rem;align-items:baseline;border-top:1px solid var(--rule);padding:.6rem 0;font:400 1.15rem var(--serif)}
+.nrow:last-of-type{border-bottom:1px solid var(--rule)}
+.nrow .v{color:#cfc7b6}
+.nrow .d{min-width:3.2rem;text-align:right;font:500 .9rem var(--sans);color:var(--dim)}
+.nrow .d.up{color:#9fd3a6}.nrow .d.down{color:#f0a58f}
+#nightLines{margin:1.1rem 0 .4rem}
+#nightLines p{margin:.35rem 0;color:#d6cebd;font:italic 400 1.05rem/1.55 var(--serif)}
+#nightNote{margin:1.2rem 0 1.4rem;padding-left:1rem;border-left:2px solid var(--lamp);color:#cfc7b6;font:400 .9rem/1.6 var(--sans)}
+#nightNote b{display:block;margin-bottom:.2rem;color:var(--dim);font:500 .78rem var(--sans);letter-spacing:.05em}
+
+
+#alert{position:absolute;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity .8s ease;
+  background:radial-gradient(ellipse at 50% 50%,rgba(200,50,30,.04),rgba(200,50,30,.42))}
+#alert.on{opacity:.6;animation:alarm 1.4s ease-in-out infinite}
+@keyframes alarm{0%,100%{opacity:.3}50%{opacity:1}}
+#timer{display:none;position:relative;margin-top:.9rem;height:3px;background:var(--rule)}
+#timer.on{display:block}
+#timer span{display:block;height:100%;width:100%;background:#f0a58f}
+#timer i{position:absolute;right:0;top:-1.5rem;font:500 .85rem var(--sans);color:#f0a58f;font-style:normal}
+#daycard .dcs{margin-top:1rem;max-width:28rem;color:var(--dim);font:400 .85rem/1.5 var(--sans)}
+.chk{display:flex;gap:.6rem;align-items:center;color:var(--dim);font:400 .9rem var(--sans);cursor:pointer}
+.chk input{accent-color:var(--lamp);width:1rem;height:1rem}
+
+
+#runhud{position:absolute;top:calc(7vh + .8rem);left:max(1.2rem,3vw);z-index:5;display:none;gap:1.4rem;pointer-events:none}
+#runhud.on{display:flex}
+#runhud div{display:flex;flex-direction:column;gap:.1rem;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+#runhud span{color:var(--dim);font:500 .74rem var(--sans);letter-spacing:.05em;text-transform:none}
+#runhud b{color:var(--paper);font:400 1.35rem var(--serif)}
+#runhud b.low{color:#f0a58f}
+
+
+#caption[data-who=hana] .body{color:#e3d4bb}
+#endings,#replay{z-index:8;transition-duration:.3s;background:linear-gradient(90deg,rgba(6,10,13,.97) 0%,rgba(6,10,13,.92) 60%,rgba(6,10,13,.6) 100%);
+  overflow-y:auto;justify-content:flex-start;padding-top:calc(7vh + 2rem);padding-bottom:calc(7vh + 2rem)}
+#endings .panel,#replay .panel{width:min(44rem,100%);margin:0}
+.egroup{margin:1.4rem 0 .4rem;color:var(--dim);font:500 .78rem var(--sans);letter-spacing:.05em}
+.erow{display:grid;grid-template-columns:1fr auto;gap:1rem;border-top:1px solid var(--rule);padding:.7rem 0}
+.erow:last-child{border-bottom:1px solid var(--rule)}
+.erow .en{font:400 1.2rem/1.3 var(--serif)}
+.erow .ed{margin-top:.15rem;color:var(--dim);font:400 .85rem/1.45 var(--sans)}
+.erow .et{align-self:start;color:var(--dim);font:500 .78rem var(--sans)}
+.erow.locked .en{color:#6d777f}
+.erow.found .en{color:var(--paper)}
+.rrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--rule);padding:.8rem 0;color:var(--paper);font:400 1.15rem var(--serif);cursor:pointer}
+.rrow:last-child{border-bottom:1px solid var(--rule)}
+.rrow:hover{background:rgba(236,228,211,.05)}
+.rrow:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+#endFound{margin:0 0 1rem;color:var(--dim);font:500 .85rem var(--sans)}
+.endbtns{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.2rem}
+
+@media (prefers-reduced-motion:reduce){
+  #alert.on{animation:none;opacity:.55}
+  .grain{animation:none}
+  #fade{transition-duration:.01s}
+  .logo-rule{transition-duration:.01s}
+  #caption.ready .go{animation:none;opacity:1}
+}
+@media (max-width:640px){.row{gap:.8rem}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="gWall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f2c35"/><stop offset="1" stop-color="#111b21"/></linearGradient>
+    <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b2019"/><stop offset="1" stop-color="#0f0c0a"/></linearGradient>
+    <linearGradient id="gWin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#35506b"/><stop offset=".65" stop-color="#8aa6c1"/><stop offset="1" stop-color="#c9d5df"/></linearGradient>
+    <radialGradient id="gLamp" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#ffcf8a" stop-opacity=".85"/>
+      <stop offset=".4" stop-color="#e6a85c" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#e6a85c" stop-opacity="0"/></radialGradient>
+    <radialGradient id="gHead" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff6d8" stop-opacity=".85"/><stop offset="1" stop-color="#fff6d8" stop-opacity="0"/></radialGradient>
+    <linearGradient id="gBeam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9fbad3" stop-opacity=".16"/><stop offset="1" stop-color="#9fbad3" stop-opacity=".02"/></linearGradient>
+    <linearGradient id="gFg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070b0d" stop-opacity="0"/><stop offset="1" stop-color="#070b0d" stop-opacity=".9"/></linearGradient>
+    <linearGradient id="gBriefWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10202b"/><stop offset="1" stop-color="#08121a"/></linearGradient>
+    <linearGradient id="gBriefFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f1c24"/><stop offset="1" stop-color="#04080b"/></linearGradient>
+    <radialGradient id="gScreen" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#15455a"/><stop offset="1" stop-color="#08202c"/></radialGradient>
+    <radialGradient id="gCyan" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#6fd0f0" stop-opacity=".8"/><stop offset="1" stop-color="#6fd0f0" stop-opacity="0"/></radialGradient>
+    <linearGradient id="gCyanFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fb3d9" stop-opacity=".22"/><stop offset="1" stop-color="#4fb3d9" stop-opacity="0"/></linearGradient>
+    <linearGradient id="gCabin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#101820"/><stop offset="1" stop-color="#05080b"/></linearGradient>
+    <radialGradient id="gEarth" cx=".5" cy=".18" r=".9"><stop offset="0" stop-color="#5aa6ee"/><stop offset=".5" stop-color="#245aa8"/><stop offset="1" stop-color="#0a2352"/></radialGradient>
+    <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b5c9a"/><stop offset="1" stop-color="#9cc4ea"/></linearGradient>
+    <linearGradient id="gGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#75787a"/><stop offset="1" stop-color="#26282a"/></linearGradient>
+    <linearGradient id="gHabWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a262d"/><stop offset="1" stop-color="#0b1318"/></linearGradient>
+    <linearGradient id="gHabFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#151d22"/><stop offset="1" stop-color="#05080a"/></linearGradient>
+    <clipPath id="portClip2"><circle cx="270" cy="300" r="120"/></clipPath>
+    <linearGradient id="gCallWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2b20"/><stop offset="1" stop-color="#22160e"/></linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+
+  <g id="cam">
+    <!-- far layer: wall, window, poster -->
+    <g id="layerBg">
+      <rect x="-500" y="-400" width="2600" height="1040" fill="url(#gWall)"/>
+      <rect x="-500" y="628" width="2600" height="18" fill="#0d1519"/>
+      <rect x="-500" y="640" width="2600" height="700" fill="url(#gFloor)"/>
+      <g stroke="#000" stroke-opacity=".38" stroke-width="2">
+        <line x1="-500" y1="690" x2="2100" y2="690"/><line x1="-500" y1="750" x2="2100" y2="750"/>
+        <line x1="-500" y1="830" x2="2100" y2="830"/><line x1="-500" y1="930" x2="2100" y2="930"/>
+        <line x1="240" y1="640" x2="150" y2="690"/><line x1="820" y1="690" x2="770" y2="750"/>
+        <line x1="1240" y1="640" x2="1290" y2="690"/><line x1="460" y1="750" x2="420" y2="830"/>
+        <line x1="1050" y1="750" x2="1090" y2="830"/></g>
+      <!-- window -->
+      <rect x="106" y="106" width="328" height="368" fill="#0a1116"/>
+      <rect x="122" y="122" width="296" height="336" fill="url(#gWin)"/>
+      <path d="M122 384 C190 350 250 376 316 352 S392 362 418 350 V458 H122 Z" fill="#26343f"/>
+      <path d="M122 420 C210 398 300 424 418 404 V458 H122 Z" fill="#1c2932"/>
+      <circle cx="352" cy="336" r="3" fill="#ffdca0"/>
+      <rect id="duskGlass" x="122" y="122" width="296" height="336" fill="#e8843f" opacity="0" style="transition:opacity 3s ease"/>
+      <clipPath id="winClip"><rect x="122" y="122" width="296" height="336"/></clipPath>
+      <g id="car" clip-path="url(#winClip)" opacity="0">
+        <rect x="122" y="428" width="296" height="30" fill="#141d25"/>
+        <g id="carBody" transform="translate(520 428)">
+          <ellipse cx="-96" cy="-6" rx="70" ry="24" fill="url(#gHead)"/>
+          <rect x="-70" y="-24" width="140" height="30" rx="10" fill="#e9e6e0"/>
+          <path d="M-40 -24 L-25 -42 H30 L48 -24 Z" fill="#dcd8d0"/>
+          <path d="M-32 -26 L-20 -38 H-2 V-26 Z" fill="#1b2a37"/><path d="M4 -26 V-38 H26 L38 -26 Z" fill="#1b2a37"/>
+          <circle cx="-40" cy="8" r="9" fill="#0f1418"/><circle cx="42" cy="8" r="9" fill="#0f1418"/>
+          <circle cx="10" cy="-10" r="7" fill="#2456a8"/><ellipse cx="10" cy="-10" rx="7" ry="2.4" fill="none" stroke="#fff" stroke-width="1.2" transform="rotate(-20 10 -10)"/>
+          <circle cx="-68" cy="-12" r="5" fill="#fff6d8"/>
+        </g>
+      </g>
+      <g stroke="#0a1116" stroke-width="9"><line x1="270" y1="122" x2="270" y2="458"/><line x1="122" y1="292" x2="418" y2="292"/></g>
+      <rect x="94" y="474" width="352" height="14" fill="#141d23"/>
+      <polygon points="150,646 410,646 700,930 20,930" fill="url(#gBeam)"/>
+      <!-- moon poster -->
+      <rect x="690" y="150" width="152" height="204" fill="#0d151b" stroke="#2c3b46" stroke-width="2"/>
+      <circle cx="766" cy="240" r="50" fill="#cdd1cf"/>
+      <circle cx="748" cy="226" r="9" fill="#a5aaa8"/><circle cx="784" cy="256" r="6" fill="#a5aaa8"/>
+      <circle cx="772" cy="216" r="5" fill="#a5aaa8"/><circle cx="752" cy="262" r="4" fill="#b3b8b5"/>
+      <g fill="#cdd1cf" opacity=".6"><circle cx="712" cy="176" r="1.6"/><circle cx="818" cy="190" r="1.4"/>
+        <circle cx="806" cy="322" r="1.6"/><circle cx="716" cy="318" r="1.2"/></g>
+      <rect id="nightVeil" x="-500" y="-400" width="2600" height="1400" fill="#050a14" opacity="0" style="transition:opacity 2s ease"/>
+    </g>
+
+    <!-- middle layer: furniture, Mimi, figurine -->
+    <g id="layerMid">
+      <!-- bed -->
+      <rect x="1110" y="524" width="490" height="132" rx="6" fill="#182129"/>
+      <rect x="1124" y="486" width="480" height="96" rx="16" fill="#2b3c4b"/>
+      <path d="M1124 530 H1604" stroke="#1c2a36" stroke-width="3"/>
+      <rect x="1136" y="462" width="140" height="48" rx="22" fill="#8f8a7f"/>
+      <rect x="1120" y="650" width="16" height="30" fill="#10171c"/><rect x="1570" y="650" width="16" height="30" fill="#10171c"/>
+      <!-- chair -->
+      <g transform="rotate(-8 480 600)">
+        <rect x="424" y="468" width="16" height="122" fill="#1f2a32"/>
+        <rect x="424" y="566" width="120" height="16" fill="#26333c"/>
+        <rect x="436" y="582" width="12" height="80" fill="#1b252c"/><rect x="520" y="582" width="12" height="80" fill="#1b252c"/></g>
+      <!-- under-desk dark -->
+      <rect x="578" y="492" width="394" height="152" fill="#080c0f"/>
+      <!-- lamp glow onto floor and desk -->
+      <ellipse cx="780" cy="706" rx="330" ry="70" fill="url(#gLamp)" opacity=".55"/>
+      <!-- Mimi -->
+      <g id="mimi" opacity="0" style="transition:opacity 2.4s ease">
+        <path d="M772 656 C758 612 774 584 806 580 C838 578 854 602 848 656 Z" fill="#54444f"/>
+        <ellipse cx="782" cy="632" rx="36" ry="25" fill="#463a44"/>
+        <path d="M836 592 C822 624 796 630 778 618" fill="none" stroke="#54444f" stroke-width="13" stroke-linecap="round"/>
+        <circle cx="812" cy="562" r="24" fill="#a67d69"/><ellipse cx="800" cy="570" rx="16" ry="18" fill="#1a1512" opacity=".28"/>
+        <path d="M787 558 C790 530 836 530 838 558 C826 546 800 546 787 558 Z" fill="#1a1512"/>
+        <path d="M832 546 C842 556 842 574 834 586" fill="none" stroke="#ffcf8a" stroke-opacity=".35" stroke-width="3"/>
+      </g>
+      <!-- desk -->
+      <rect x="556" y="492" width="22" height="172" fill="#2a1e16"/>
+      <rect x="972" y="492" width="22" height="172" fill="#2a1e16"/>
+      <rect x="538" y="468" width="474" height="24" rx="3" fill="#3e2d21"/>
+      <rect x="538" y="468" width="474" height="4" fill="#5a4230"/>
+      <!-- desk things -->
+      <rect x="850" y="450" width="70" height="18" fill="#2a3b4a"/><rect x="856" y="434" width="60" height="16" fill="#4a3b31"/>
+      <rect x="930" y="454" width="60" height="14" fill="#c9c0ab" opacity=".55"/>
+      <!-- lamp -->
+      <ellipse cx="640" cy="466" rx="34" ry="7" fill="#161a1d"/>
+      <path d="M640 466 L690 392 L744 374" fill="none" stroke="#242c32" stroke-width="7" stroke-linecap="round"/>
+      <polygon points="732,362 792,378 770,414 720,394" fill="#252d33"/>
+      <circle cx="758" cy="400" r="7" fill="#ffe2a8"/>
+      <ellipse cx="740" cy="470" rx="300" ry="120" fill="url(#gLamp)" opacity=".55"/>
+      <!-- figurine -->
+      <g id="fig" opacity="0" transform="translate(800 664)">
+        <ellipse cx="0" cy="18" rx="16" ry="4" fill="#000" opacity=".5"/>
+        <rect x="-11" y="-16" width="8" height="20" rx="2" fill="#b8b3a7"/>
+        <rect x="-8" y="-14" width="17" height="22" rx="5" fill="#e4e0d5"/>
+        <rect x="-8" y="6" width="6" height="11" rx="2" fill="#d1ccbf"/><rect x="3" y="6" width="6" height="11" rx="2" fill="#d1ccbf"/>
+        <circle cx="0" cy="-22" r="11" fill="#eeebe2"/>
+        <ellipse cx="2" cy="-22" rx="7" ry="5.5" fill="#1b2a37"/>
+        <ellipse cx="4" cy="-24" rx="2.6" ry="1.6" fill="#7f9db6" opacity=".8"/>
+        <rect x="-4" y="-6" width="8" height="4" rx="1" fill="#c8553d"/>
+        <path d="M-12 -30 C-4 -36 6 -36 12 -30" fill="none" stroke="#ffcf8a" stroke-opacity=".5" stroke-width="2"/>
+      </g>
+    </g>
+
+    <!-- near layer -->
+    <g id="layerFg">
+      <rect x="-500" y="690" width="2600" height="500" fill="url(#gFg)"/>
+      <rect x="-500" y="-400" width="470" height="1600" fill="#05090b" opacity=".8"/>
+    </g>
+
+    <!-- set: the agency briefing room -->
+    <g id="setBrief" style="display:none">
+      <rect x="-500" y="-400" width="2600" height="1300" fill="url(#gBriefWall)"/>
+      <ellipse cx="800" cy="40" rx="640" ry="80" fill="url(#gCyan)" opacity=".28"/>
+      <rect x="300" y="34" width="1000" height="8" fill="#bfe6f5" opacity=".5"/>
+      <rect x="-500" y="640" width="2600" height="700" fill="url(#gBriefFloor)"/>
+      <polygon points="470,640 1130,640 1320,900 280,900" fill="url(#gCyanFloor)"/>
+      <rect x="410" y="120" width="780" height="420" fill="#0a1c27" stroke="#2f7896" stroke-width="3"/>
+      <rect x="420" y="130" width="760" height="400" fill="url(#gScreen)"/>
+      <g stroke="#3aa1c8" stroke-opacity=".2" stroke-width="1">
+        <line x1="500" y1="130" x2="500" y2="530"/><line x1="600" y1="130" x2="600" y2="530"/><line x1="1000" y1="130" x2="1000" y2="530"/><line x1="1100" y1="130" x2="1100" y2="530"/>
+        <line x1="420" y1="210" x2="1180" y2="210"/><line x1="420" y1="450" x2="1180" y2="450"/></g>
+      <circle cx="800" cy="330" r="128" fill="#c9d1d4"/>
+      <path d="M800 202 A128 128 0 0 0 800 458 A70 128 0 0 1 800 202 Z" fill="#0d1e28" opacity=".55"/>
+      <circle cx="760" cy="300" r="16" fill="#a5aaa8"/><circle cx="836" cy="370" r="11" fill="#a5aaa8"/><circle cx="790" cy="390" r="8" fill="#b3b8b5"/><circle cx="850" cy="290" r="9" fill="#a5aaa8"/>
+      <ellipse cx="800" cy="330" rx="250" ry="62" fill="none" stroke="#5fc4e8" stroke-opacity=".75" stroke-width="2" stroke-dasharray="7 6"/>
+      <circle cx="1050" cy="330" r="6" fill="#ffcf8a"/>
+      <g fill="#3aa1c8" opacity=".6">
+        <rect x="448" y="440" width="14" height="60"/><rect x="470" y="410" width="14" height="90"/><rect x="492" y="450" width="14" height="50"/><rect x="514" y="395" width="14" height="105"/>
+        <rect x="1000" y="160" width="140" height="8"/><rect x="1000" y="180" width="100" height="8"/><rect x="1000" y="200" width="120" height="8"/></g>
+      <g id="official">
+        <path d="M1032 640 L1048 470 C1050 442 1102 442 1106 470 L1124 640 Z" fill="#0b1319"/>
+        <circle cx="1077" cy="424" r="22" fill="#0e1920"/><circle cx="1094" cy="404" r="10" fill="#0b1319"/>
+        <path d="M1050 470 C1052 446 1102 446 1104 470" fill="none" stroke="#6fd0f0" stroke-opacity=".5" stroke-width="3"/>
+      </g>
+      <rect x="200" y="618" width="1200" height="34" rx="4" fill="#0d1a22"/>
+      <rect x="200" y="618" width="1200" height="4" fill="#5fc4e8" opacity=".45"/>
+      <rect x="700" y="606" width="96" height="10" rx="2" fill="#a9dff2" opacity=".7"/>
+      <g fill="#060b0e"><rect x="300" y="684" width="150" height="110" rx="34"/><rect x="560" y="694" width="150" height="110" rx="34"/><rect x="900" y="694" width="150" height="110" rx="34"/><rect x="1160" y="684" width="150" height="110" rx="34"/></g>
+    </g>
+
+    <!-- set: inside the capsule -->
+    <g id="setLaunch" style="display:none">
+      <rect x="-500" y="-400" width="2600" height="1400" fill="url(#gCabin)"/>
+      <clipPath id="portClip"><circle cx="1010" cy="380" r="190"/></clipPath>
+      <circle cx="1010" cy="380" r="210" fill="#1c2730"/>
+      <g clip-path="url(#portClip)">
+        <rect x="800" y="150" width="420" height="460" fill="#02050a"/>
+        <g fill="#fff" opacity=".85"><circle cx="880" cy="230" r="1.6"/><circle cx="960" cy="200" r="1.2"/><circle cx="1100" cy="250" r="1.8"/><circle cx="1150" cy="330" r="1.2"/><circle cx="900" cy="330" r="1.4"/><circle cx="1050" cy="215" r="1"/><circle cx="1180" cy="200" r="1.4"/></g>
+        <circle id="earth" cx="1010" cy="1500" r="760" fill="url(#gEarth)"/>
+        <circle id="earthRing" cx="1010" cy="1500" r="774" fill="none" stroke="#7fc4ff" stroke-opacity=".3" stroke-width="18"/>
+        <rect id="launchSky" x="800" y="150" width="420" height="460" fill="url(#gSky)" opacity="1"/>
+      </g>
+      <circle cx="1010" cy="380" r="190" fill="none" stroke="#000" stroke-opacity=".55" stroke-width="12"/>
+      <rect x="110" y="170" width="440" height="310" rx="10" fill="#0d151c" stroke="#1d2a34" stroke-width="3"/>
+      <g><circle cx="160" cy="220" r="6" fill="#ffb454"/><circle cx="190" cy="220" r="6" fill="#5ee08a"/><circle cx="220" cy="220" r="6" fill="#ffb454"/><circle cx="250" cy="220" r="6" fill="#e0574f"/></g>
+      <g fill="#2a4a5c"><rect x="160" y="260" width="330" height="10"/><rect x="160" y="290" width="240" height="10"/><rect x="160" y="320" width="290" height="10"/><rect x="160" y="380" width="120" height="60" rx="6"/><rect x="310" y="380" width="120" height="60" rx="6"/></g>
+      <path d="M-120 900 L-120 520 C-120 430 130 420 230 470 L310 900 Z" fill="#05080b"/>
+      <g id="figFloat" opacity="0" transform="translate(720 600) scale(2.2)"></g>
+    </g>
+
+    <!-- set: the Moon surface -->
+    <g id="setSurface" style="display:none">
+      <rect x="-500" y="-400" width="2600" height="1000" fill="#020306"/>
+      <g id="surfStars" fill="#fff"></g>
+      <circle cx="1180" cy="190" r="58" fill="url(#gEarth)"/>
+      <circle cx="1180" cy="190" r="62" fill="none" stroke="#7fc4ff" stroke-opacity=".25" stroke-width="6"/>
+      <path d="M-500 560 L-200 520 L60 548 L300 500 L560 545 L820 515 L1100 548 L1400 505 L1700 540 L2100 520 L2100 700 L-500 700 Z" fill="#45484b"/>
+      <rect x="-500" y="548" width="2600" height="700" fill="url(#gGround)"/>
+      <g fill="none" stroke="#9a9c9d" stroke-opacity=".35" stroke-width="3">
+        <ellipse cx="300" cy="700" rx="150" ry="24"/><ellipse cx="1300" cy="640" rx="110" ry="16"/><ellipse cx="620" cy="820" rx="220" ry="34"/></g>
+      <g fill="#2f3133"><ellipse cx="200" cy="760" rx="26" ry="9"/><ellipse cx="1420" cy="700" rx="34" ry="11"/><ellipse cx="1050" cy="790" rx="20" ry="7"/></g>
+      <polygon id="shadHab" points="880,592 560,650 620,676 1010,616" fill="#000" opacity=".42"/>
+      <polygon id="shadLander" points="240,596 -40,640 20,660 330,610" fill="#000" opacity=".42"/>
+      <g id="lowSun" style="display:none">
+        <rect x="-500" y="548" width="2600" height="700" fill="#000" opacity=".3"/>
+        <ellipse cx="60" cy="552" rx="560" ry="100" fill="url(#gLamp)" opacity=".6"/>
+        <circle cx="90" cy="548" r="26" fill="#fff0c8"/>
+        <polygon points="1220,592 1800,648 1740,676 1140,604" fill="#000" opacity=".5"/>
+        <polygon points="436,602 940,656 916,684 380,612" fill="#000" opacity=".5"/>
+        <polygon points="830,548 1500,626 1470,656 770,576" fill="#000" opacity=".45"/>
+      </g>
+      <g id="lander">
+        <path d="M262 520 L232 600 M420 520 L450 600 M340 520 L340 604" stroke="#a9a59a" stroke-width="6" stroke-linecap="round"/>
+        <rect x="246" y="420" width="190" height="110" rx="12" fill="#c8a24b"/>
+        <path d="M246 430 L436 430" stroke="#8f7430" stroke-width="4"/>
+        <rect x="290" y="380" width="100" height="44" rx="8" fill="#b4b7b8"/>
+        <ellipse cx="340" cy="402" rx="22" ry="12" fill="#1b2a37"/>
+      </g>
+      <g id="solarArm">
+        <path d="M770 560 L770 470" stroke="#8b8f92" stroke-width="7"/>
+        <polygon points="640,470 830,440 830,540 640,570" fill="#1c2f52" stroke="#9aa3ab" stroke-width="3"/>
+        <g stroke="#5a769f" stroke-opacity=".6" stroke-width="2"><line x1="703" y1="460" x2="703" y2="556"/><line x1="766" y1="450" x2="766" y2="548"/></g>
+        <polygon id="dustPanel" points="640,470 830,440 830,540 640,570" fill="#b9aa90" opacity="0"/>
+      </g>
+      <g id="habOutside">
+        <rect x="880" y="440" width="340" height="150" rx="44" fill="#c9cccd"/>
+        <rect x="880" y="440" width="340" height="18" rx="9" fill="#e6e8e8"/>
+        <g stroke="#9fa3a5" stroke-width="2"><line x1="1085" y1="450" x2="1085" y2="586"/></g>
+        <rect x="915" y="486" width="150" height="20" rx="10" fill="#1b2a37"/>
+        <rect x="1140" y="508" width="46" height="82" rx="4" fill="#8e9295"/>
+        <circle cx="1052" cy="452" r="5" fill="#ffb454"/>
+      </g>
+      <g id="runShade" opacity="0">
+        <ellipse cx="640" cy="812" rx="330" ry="74" fill="#000" opacity=".62"/>
+        <g fill="#cfe6f5" opacity=".85"><polygon points="560,800 578,790 586,806 566,812"/><polygon points="660,822 676,812 690,826 670,832"/><polygon points="740,798 752,790 762,802 748,808"/></g>
+      </g>
+      <g id="prints" fill="#1f2022">
+        <ellipse cx="560" cy="792" rx="17" ry="5" opacity="0"/><ellipse cx="600" cy="770" rx="16" ry="5" opacity="0"/>
+        <ellipse cx="646" cy="752" rx="15" ry="4.6" opacity="0"/><ellipse cx="694" cy="734" rx="14" ry="4.4" opacity="0"/>
+        <ellipse cx="744" cy="718" rx="13" ry="4.2" opacity="0"/><ellipse cx="796" cy="704" rx="12" ry="4" opacity="0"/>
+        <ellipse cx="850" cy="692" rx="11" ry="3.8" opacity="0"/><ellipse cx="906" cy="682" rx="10" ry="3.6" opacity="0"/>
+      </g>
+    </g>
+
+    <!-- set: inside the habitat -->
+    <g id="setHab" style="display:none">
+      <rect x="-500" y="-400" width="2600" height="1100" fill="url(#gHabWall)"/>
+      <g stroke="#fff" stroke-opacity=".05" stroke-width="2">
+        <line x1="120" y1="0" x2="120" y2="640"/><line x1="520" y1="0" x2="520" y2="640"/><line x1="1080" y1="0" x2="1080" y2="640"/><line x1="1480" y1="0" x2="1480" y2="640"/></g>
+      <rect x="-500" y="54" width="2600" height="7" fill="#f2c98a" opacity=".5"/>
+      <ellipse cx="800" cy="60" rx="700" ry="90" fill="url(#gLamp)" opacity=".35"/>
+      <g id="habEye" class="habeye" transform="translate(800 132)">
+        <circle r="40" fill="url(#gCyan)" opacity=".5"/><circle r="30" fill="none" stroke="#7fd6f5" stroke-width="2"/>
+        <circle r="18" fill="none" stroke="#7fd6f5" stroke-width="2" stroke-opacity=".7"/><circle r="6" fill="#bfeeff"/></g>
+      <circle cx="270" cy="300" r="136" fill="#1a252c"/>
+      <g clip-path="url(#portClip2)">
+        <rect x="150" y="180" width="240" height="240" fill="#02050a"/>
+        <g fill="#fff" opacity=".8"><circle cx="200" cy="230" r="1.5"/><circle cx="300" cy="215" r="1.2"/><circle cx="345" cy="270" r="1.5"/><circle cx="230" cy="290" r="1"/></g>
+        <circle cx="320" cy="232" r="14" fill="url(#gEarth)"/>
+        <rect x="150" y="345" width="240" height="90" fill="#6d7073"/>
+        <path d="M150 350 L230 336 L300 348 L390 332 L390 360 L150 360 Z" fill="#45484b"/>
+      </g>
+      <circle cx="270" cy="300" r="120" fill="none" stroke="#000" stroke-opacity=".5" stroke-width="10"/>
+      <rect x="-500" y="640" width="2600" height="700" fill="url(#gHabFloor)"/>
+      <g stroke="#3a4a55" stroke-opacity=".45" stroke-width="2">
+        <line x1="-500" y1="700" x2="2100" y2="700"/><line x1="-500" y1="780" x2="2100" y2="780"/>
+        <line x1="400" y1="640" x2="240" y2="900"/><line x1="800" y1="640" x2="800" y2="900"/><line x1="1200" y1="640" x2="1360" y2="900"/></g>
+      <rect x="1060" y="470" width="440" height="180" rx="8" fill="#0d151b" stroke="#24343f" stroke-width="3"/>
+      <rect x="1084" y="494" width="180" height="90" fill="#123241"/><rect x="1284" y="494" width="180" height="60" fill="#0f2833"/>
+      <g fill="#3aa1c8" opacity=".7"><rect x="1096" y="560" width="30" height="6"/><rect x="1096" y="540" width="80" height="6"/><rect x="1298" y="512" width="120" height="6"/></g>
+      <g><circle cx="1300" cy="600" r="5" fill="#ffb454"/><circle cx="1324" cy="600" r="5" fill="#5ee08a"/><circle cx="1348" cy="600" r="5" fill="#ffb454"/></g>
+      <g id="breach" opacity="0">
+        <polygon points="1300,236 1322,262 1354,246 1338,282 1372,300 1330,306 1320,344 1296,312 1258,322 1282,288 1252,262 1288,266" fill="#05080a" stroke="#c9cccd" stroke-width="3"/>
+        <g stroke="#e8f2f8" stroke-opacity=".55" stroke-width="2" fill="none"><path d="M1330 280 C1380 260 1420 250 1470 236"/><path d="M1336 296 C1388 292 1430 300 1480 306"/><path d="M1322 268 C1350 230 1370 210 1396 186"/></g>
+      </g>
+      <g id="okaforFace" opacity="0">
+        <rect x="1084" y="494" width="180" height="90" fill="#0f2a38"/>
+        <path d="M1120 584 C1124 552 1224 552 1228 584 Z" fill="#2c4a63"/>
+        <rect x="1160" y="548" width="28" height="14" fill="#6d4d3c"/>
+        <circle cx="1174" cy="530" r="23" fill="#7d5a47"/>
+        <path d="M1150 526 C1152 502 1198 502 1198 526 C1190 514 1160 514 1150 526 Z" fill="#cfcac0"/>
+        <circle cx="1166" cy="532" r="2.2" fill="#1a120e"/><circle cx="1182" cy="532" r="2.2" fill="#1a120e"/>
+        <path d="M1166 545 L1182 544" stroke="#3d2618" fill="none" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <g id="figConsole" opacity="0" transform="translate(1440 468) scale(1.2)"></g>
+      <ellipse cx="800" cy="646" rx="272" ry="52" fill="#0b141a" stroke="#3aa1c8" stroke-width="2"/>
+      <ellipse cx="800" cy="626" rx="240" ry="40" fill="#0f2430"/>
+      <polygon points="630,626 970,626 880,300 720,300" fill="url(#gCyan)" opacity=".2"/>
+      <path d="M672 622 Q800 366 928 622" fill="none" stroke="#7fd6f5" stroke-width="2.5"/>
+      <path d="M700 622 Q800 430 900 622" fill="none" stroke="#7fd6f5" stroke-width="1.5" stroke-opacity=".7"/>
+      <ellipse cx="800" cy="500" rx="150" ry="30" fill="none" stroke="#ffcf8a" stroke-opacity=".7" stroke-width="1.5" stroke-dasharray="6 6"/>
+      <circle cx="950" cy="500" r="5" fill="#ffcf8a"/>
+    </g>
+
+    <!-- set: Mimi's birthday table (seen through the video link) -->
+    <g id="setCall" style="display:none">
+      <rect x="-500" y="-400" width="2600" height="1040" fill="url(#gCallWall)"/>
+      <rect x="-500" y="640" width="2600" height="700" fill="#2b1e15"/>
+      <rect x="1240" y="120" width="230" height="300" fill="#0d1a2a" stroke="#4a3626" stroke-width="10"/>
+      <circle cx="1340" cy="230" r="14" fill="#dfe6f0" opacity=".85"/>
+      <rect x="90" y="200" width="200" height="440" fill="#1c1410"/>
+      <rect x="100" y="210" width="180" height="430" fill="#7a5a3a" opacity=".55"/>
+      <g id="callAdult"><path d="M150 640 L160 430 C162 400 228 400 232 430 L244 640 Z" fill="#120d0a"/><circle cx="196" cy="384" r="26" fill="#120d0a"/></g>
+      <g stroke="#c9b79a" stroke-width="2"><line x1="420" y1="120" x2="440" y2="330"/><line x1="520" y1="110" x2="500" y2="330"/></g>
+      <ellipse cx="420" cy="90" rx="34" ry="44" fill="#b85c5c"/><ellipse cx="520" cy="80" rx="34" ry="44" fill="#5c7fb8"/>
+      <g id="callChair"><rect x="1290" y="360" width="20" height="190" fill="#4a3626"/><rect x="1230" y="540" width="100" height="16" fill="#5a4230"/>
+        <rect x="1240" y="556" width="12" height="100" fill="#3d2c1f"/><rect x="1310" y="556" width="12" height="100" fill="#3d2c1f"/></g>
+      <rect x="560" y="452" width="130" height="120" rx="30" fill="#3d5b78"/>
+      <circle cx="625" cy="410" r="36" fill="#d6a88f"/>
+      <path d="M589 404 C592 372 660 372 662 404 C650 392 604 392 589 404 Z" fill="#1a1512"/>
+      <circle cx="612" cy="414" r="3" fill="#2a1d16"/><circle cx="638" cy="414" r="3" fill="#2a1d16"/>
+      <path d="M614 430 Q625 436 636 430" fill="none" stroke="#7a4a3a" stroke-width="2.5" stroke-linecap="round"/>
+      <g id="callCrown"><polygon points="595,376 604,346 615,368 625,340 636,368 647,346 655,376" fill="#d9b24c"/></g>
+      <path d="M400 528 H1180 L1200 700 H380 Z" fill="#b8a58a"/>
+      <rect x="400" y="520" width="780" height="14" fill="#cdbb9f"/>
+      <g id="callCrownTable" opacity="0"><polygon points="1010,522 1016,500 1026,514 1036,496 1046,514 1056,500 1062,522" fill="#d9b24c"/></g>
+      <rect x="750" y="476" width="190" height="48" rx="6" fill="#ead9bd"/><rect x="750" y="460" width="190" height="20" rx="8" fill="#d8a1a8"/>
+      <g fill="#8fb6d9"><rect x="762" y="430" width="5" height="30"/><rect x="785" y="430" width="5" height="30"/><rect x="808" y="430" width="5" height="30"/><rect x="831" y="430" width="5" height="30"/>
+        <rect x="854" y="430" width="5" height="30"/><rect x="877" y="430" width="5" height="30"/><rect x="900" y="430" width="5" height="30"/><rect x="923" y="430" width="5" height="30"/></g>
+      <g id="flames" fill="#ffcf6a"><ellipse cx="764.5" cy="424" rx="4" ry="7"/><ellipse cx="787.5" cy="424" rx="4" ry="7"/><ellipse cx="810.5" cy="424" rx="4" ry="7"/><ellipse cx="833.5" cy="424" rx="4" ry="7"/>
+        <ellipse cx="856.5" cy="424" rx="4" ry="7"/><ellipse cx="879.5" cy="424" rx="4" ry="7"/><ellipse cx="902.5" cy="424" rx="4" ry="7"/><ellipse cx="925.5" cy="424" rx="4" ry="7"/></g>
+      <g id="callSlice" opacity="0"><ellipse cx="1130" cy="526" rx="44" ry="9" fill="#e9e6e0"/>
+        <polygon points="1108,522 1146,514 1142,500 1110,507" fill="#ead9bd"/><polygon points="1108,507 1142,500 1146,514 1108,522" fill="#ead9bd"/>
+        <rect x="1108" y="504" width="36" height="6" fill="#d8a1a8" transform="rotate(-10 1108 504)"/></g>
+      <ellipse cx="820" cy="500" rx="500" ry="220" fill="url(#gLamp)" opacity=".5"/>
+    </g>
+
+    <!-- set: coming home (the front door) -->
+    <g id="setDoor" style="display:none">
+      <rect x="-500" y="-400" width="2600" height="1040" fill="#2b2620"/>
+      <rect x="-500" y="640" width="2600" height="700" fill="#1c1611"/>
+      <rect x="640" y="170" width="320" height="490" fill="#f6dba0"/>
+      <ellipse cx="800" cy="420" rx="360" ry="320" fill="url(#gLamp)" opacity=".8"/>
+      <polygon points="640,660 960,660 1260,900 340,900" fill="#f6dba0" opacity=".2"/>
+      <rect x="620" y="150" width="22" height="512" fill="#100c09"/><rect x="958" y="150" width="22" height="512" fill="#100c09"/><rect x="620" y="150" width="360" height="24" fill="#100c09"/>
+      <g id="doorHana" transform="translate(700 660)">
+        <path d="M-34 0 L-26 -210 C-24 -246 26 -246 28 -210 L36 0 Z" fill="#0b0806"/>
+        <circle cx="0" cy="-262" r="24" fill="#0b0806"/><circle cx="14" cy="-284" r="11" fill="#0b0806"/>
+      </g>
+      <g id="doorMimi" transform="translate(880 660) scale(1.2)">
+        <path d="M-24 0 L-20 -92 C-18 -112 18 -112 20 -92 L24 0 Z" fill="#0d0907"/>
+        <circle cx="0" cy="-128" r="22" fill="#0d0907"/>
+      </g>
+    </g>
+  </g>
+</svg>
+
+<div id="tint"></div>
+<div id="callfx"></div>
+<div id="alert"></div>
+<div id="runhud"><div><span>Suit oxygen</span><b id="rhO2"></b></div><div><span>Condition</span><b id="rhInj"></b></div><div><span>Sample</span><b id="rhSample"></b></div></div>
+<div class="shade"></div>
+<div class="vignette"></div>
+<div class="grain" id="grain"></div>
+<div class="bar top"></div><div class="bar bottom"></div>
+<div id="fade"></div>
+
+<!-- start gate: audio needs one click -->
+<div id="gate" class="screen center on" role="button" tabindex="0" aria-label="Press to begin">
+  <p>Press any key or click to begin. Sound on is best.</p>
+</div>
+
+<!-- logo -->
+<div id="logo" class="screen center" aria-hidden="true">
+  <div class="box"><div class="logo-word">The Human Margin</div><div class="logo-rule"><span class="dot"></span></div></div>
+</div>
+
+<!-- remembering line -->
+<div id="memory" class="screen center" aria-hidden="true">
+  <p>I remember the sound of something small, sliding across a wooden floor.</p>
+</div>
+
+<!-- profile -->
+<div id="profile" class="screen">
+  <div class="panel">
+    <h1>Before you go</h1>
+    <p class="lede">These details stay on your device. They decide how much you can carry to the Moon and how your body copes once you are there.</p>
+    <div class="field"><label for="f-name">Your name</label><input id="f-name" type="text" maxlength="24" autocomplete="off"></div>
+    <div class="field"><span class="lab" id="lab-pron">You are</span>
+      <div class="seg" role="group" aria-labelledby="lab-pron">
+        <button type="button" data-p="he" aria-pressed="false">he</button>
+        <button type="button" data-p="she" aria-pressed="false">she</button>
+        <button type="button" data-p="they" aria-pressed="true">they</button></div></div>
+    <div class="row">
+      <div class="field"><label for="f-age">Age</label><input id="f-age" type="number" inputmode="numeric" min="10" max="80"></div>
+      <div class="field"><label for="f-h">Height (cm)</label><input id="f-h" type="number" inputmode="numeric" min="100" max="220"></div>
+      <div class="field"><label for="f-w">Weight (kg)</label><input id="f-w" type="number" inputmode="numeric" min="25" max="200"></div>
+    </div>
+    <div class="field"><label for="f-date">A date to launch on (optional)</label><input id="f-date" type="date">
+      <p class="hint">A birthday works. Later it is matched to a real day of Sun and solar activity.</p></div>
+    <div class="field"><label class="chk"><input type="checkbox" id="f-relax"> Give me twice as long on timed choices</label></div>
+    <div class="err" id="err" role="alert"></div>
+    <button class="btn" id="go" type="button">Begin the morning</button>
+  </div>
+</div>
+
+<!-- dialogue -->
+<div id="dock">
+  <div id="caption" data-who="narr" aria-live="polite"><span class="tag" hidden></span><span class="body"></span><span class="go"></span></div>
+  <div id="choices" role="group" aria-label="Your choices"></div>
+  <div id="timer"><span></span><i id="timerNum"></i></div>
+</div>
+<div id="hint">Click, Enter or Space to continue. Move the mouse to look around.</div>
+<button id="mute" type="button">Sound on</button>
+
+<!-- the letter -->
+<div id="letter"><div class="sheet" id="letterText"></div></div>
+
+<!-- packing -->
+<div id="pack" class="screen">
+  <div class="panel">
+    <h1>What goes in the bag</h1>
+    <p class="lede" id="packLede"></p>
+    <div class="meter"><span>Weight</span><b id="packTotal"></b></div>
+    <div class="gauge"><span id="packBar"></span></div>
+    <div id="packList" role="group" aria-label="Gear"></div>
+    <div style="height:1.4rem"></div>
+    <button class="btn" id="packDone" type="button">Done packing</button>
+  </div>
+</div>
+
+<!-- day card -->
+<div id="daycard" class="screen center" aria-live="polite"><div><div class="dcn" id="dcN"></div><div class="dct" id="dcT"></div><div class="dcs" id="dcS"></div></div></div>
+
+<!-- planning table -->
+<div id="plan" class="screen"><div class="wrap">
+  <aside class="hud" id="hud"></aside>
+  <section id="decisions"></section>
+</div></div>
+
+<!-- overnight report -->
+<div id="night" class="screen"><div class="panel">
+  <h1 id="nightTitle">Overnight</h1>
+  <div id="nightTable"></div>
+  <div id="nightLines"></div>
+  <div id="nightNote"></div>
+  <button class="btn" id="nightGo" type="button">Continue</button>
+</div></div>
+
+<!-- endings + replay -->
+<div id="endings" class="screen"><div class="panel">
+  <h1>Endings</h1>
+  <p class="lede" id="endCount"></p>
+  <div id="endList"></div>
+  <div class="endbtns"><button class="btn" id="endBack" type="button">Back</button></div>
+</div></div>
+<div id="replay" class="screen"><div class="panel">
+  <h1>Replay a day</h1>
+  <p class="lede">Go back to the start of any day you have reached and choose differently. Everything you decided before that day stays as it was.</p>
+  <div id="replayList"></div>
+  <div class="endbtns"><button class="btn" id="replayBack" type="button">Back</button></div>
+</div></div>
+
+<!-- end of part -->
+<div id="end" class="screen">
+  <div class="panel">
+    <h2 id="endTitle">Day 1 is next.</h2>
+    <div id="endFound"></div>
+    <p id="endText">That is the whole prologue: the last morning, the promise, the packing and the launch. Next comes the landing, and your first planning table on the Moon.</p>
+    <div class="endbtns">
+      <button class="btn" id="endingsBtn" type="button">Endings</button>
+      <button class="btn" id="replayBtn" type="button">Replay a day</button>
+      <button class="btn" id="again" type="button">Play the prologue again</button>
+    </div>
+    <p style="margin-top:1.4rem"><button class="link" id="showScores" type="button">Show hidden scores</button></p>
+    <div id="scores"></div>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const $ = (s)=>document.querySelector(s);
+const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = (ms)=>new Promise(r=>setTimeout(r, reduced ? Math.min(ms,120) : ms));
+
+$('#figFloat').innerHTML = $('#fig').innerHTML;
+$('#figConsole').innerHTML = $('#fig').innerHTML;
+(function(){ let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  const g=$('#surfStars'); for(let i=0;i<80;i++){ const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',(-300+rnd()*2200).toFixed(0)); c.setAttribute('cy',(-100+rnd()*620).toFixed(0)); c.setAttribute('r',(0.6+rnd()*1.4).toFixed(1));
+    c.setAttribute('opacity',(0.35+rnd()*.6).toFixed(2)); g.appendChild(c); } })();
+
+/* ---------- film grain (built in JS so the SVG needs no escaping) ---------- */
+(function(){
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>";
+  $('#grain').style.backgroundImage = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+})();
+
+/* ---------- game state (in memory only; nothing is saved or sent) ---------- */
+const S = { name:'', pron:'they', age:0, h:0, w:0, date:'', bond:0, trust:0, log:[], promise:'', figurine:true, letter:'', kit:[], kitIds:[], logLines:[], birthday:'', relax:false, froze:false, habOverrode:false, radSick:false, injury:0, seedling:false, okaforPromise:'', okaforHonest:null, hidHealth:false, refusedOrder:false };
+function resetState(){ S.bond = 0; S.trust = 0; S.log = []; S.birthday=''; S.okaforPromise=''; S.okaforHonest=null; S.hidHealth=false; S.refusedOrder=false; S.froze=false; S.habOverrode=false; S.radSick=false; S.injury=0; S.seedling=false; S.promise=''; S.figurine=true; S.letter=''; S.kit=[]; S.kitIds=[]; S.logLines=[]; }
+
+/* ---------- audio: real files in ./audio/ replace the built-in synthesized sounds ---------- */
+let ctx=null, bus=null, o1=null, muted=false;
+const AUDIO_DIR = 'audio/';
+const AUDIO_SLOTS = {
+  hum:    ['hum.mp3','hum.ogg','hum.wav'],       // looping room tone under the title and scenes
+  slide:  ['slide.mp3','slide.ogg','slide.wav'], // the figurine sliding out
+  tick:   ['tick.mp3','tick.ogg','tick.wav'],    // the figurine stopping
+  rustle: ['rustle.mp3','rustle.ogg','rustle.wav'], // crouching down
+  hiss:   ['hiss.mp3','hiss.ogg','hiss.wav'],       // airlock hiss
+  mimi:   ['mimi-voice.mp3','mimi-voice.ogg','mimi-voice.wav'], // Mimi's one real voice message (Day 9)
+  car:    ['car.mp3','car.ogg','car.wav'],       // the car arriving
+  alarm:  ['alarm.mp3','alarm.ogg','alarm.wav'],     // storm alarm
+  launch: ['launch.mp3','launch.ogg','launch.wav']  // the launch rumble
+};
+const fileAudio = {};
+function probeAudio(list){
+  return new Promise((resolve)=>{
+    let i=0;
+    const next=()=>{
+      if(i>=list.length) return resolve(null);
+      const a=new Audio(); a.preload='auto';
+      let over=false;
+      const end=(good)=>{
+        if(over) return; over=true; clearTimeout(t);
+        a.removeEventListener('canplaythrough',onok); a.removeEventListener('error',onbad);
+        good ? resolve(a) : next();
+      };
+      const onok=()=>end(true), onbad=()=>end(false);
+      const t=setTimeout(()=>end(false), 4000);
+      a.addEventListener('canplaythrough',onok); a.addEventListener('error',onbad);
+      a.src=list[i++];
+    };
+    next();
+  });
+}
+(async function(){
+  const emb = window.HM_AUDIO || {};
+  for(const n of Object.keys(AUDIO_SLOTS)){
+    const a = emb[n] ? await probeAudio([emb[n]]) : await probeAudio(AUDIO_SLOTS[n].map(f=>AUDIO_DIR+f));
+    if(a) fileAudio[n]=a;
+  }
+})();
+function playFile(n, vol){
+  const a=fileAudio[n]; if(!a) return false;
+  try{ const c=a.cloneNode(); c.volume=vol; c.muted=muted; c.play(); }catch(e){}
+  return true;
+}
+function startAudio(){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(AC){
+      ctx = new AC();
+      bus = ctx.createGain(); bus.gain.value = muted?0:1; bus.connect(ctx.destination);
+    }
+    if(fileAudio.hum){
+      const h=fileAudio.hum; h.loop=true; h.volume=.5; h.muted=muted; h.play();
+    } else if(ctx){
+      const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=300; lp.connect(bus);
+      const hum = ctx.createGain(); hum.gain.value = 0.0001; hum.connect(lp);
+      hum.gain.setTargetAtTime(.08, ctx.currentTime, 1.5);
+      o1 = ctx.createOscillator(); o1.type='sine'; o1.frequency.value=110; o1.connect(hum);
+      const o2 = ctx.createOscillator(); o2.type='sine'; o2.frequency.value=165; o2.detune.value=-8;
+      const g2 = ctx.createGain(); g2.gain.value=.025; o2.connect(g2); g2.connect(lp);
+      const lfo = ctx.createOscillator(); lfo.frequency.value=.11;
+      const lg = ctx.createGain(); lg.gain.value=.02; lfo.connect(lg); lg.connect(hum.gain);
+      o1.start(); o2.start(); lfo.start();
+    }
+  }catch(e){ ctx=null; }
+}
+function gravityDrop(secs){
+  if(!ctx||!o1) return;
+  const t=ctx.currentTime;
+  o1.frequency.cancelScheduledValues(t);
+  o1.frequency.setValueAtTime(o1.frequency.value, t);
+  o1.frequency.exponentialRampToValueAtTime(46, t+secs);
+}
+function noiseBurst(dur, f0, f1, vol, q){
+  if(!ctx) return;
+  const n = Math.floor(ctx.sampleRate*dur), buf = ctx.createBuffer(1,n,ctx.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i] = (Math.random()*2-1);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=q||2;
+  const g = ctx.createGain(); const t = ctx.currentTime;
+  bp.frequency.setValueAtTime(f0,t); bp.frequency.exponentialRampToValueAtTime(f1,t+dur);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+dur*.25);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  src.connect(bp); bp.connect(g); g.connect(bus); src.start();
+}
+const sfx = {
+  slide(){  if(!playFile('slide',.8))  noiseBurst(1.5, 1400, 380, .16, 1.4); },
+  tick(){   if(!playFile('tick',.8))   noiseBurst(.09, 2600, 1800, .22, 6); },
+  rustle(){ if(!playFile('rustle',.7)) noiseBurst(.7, 900, 500, .09, .8); },
+  hiss(){   if(!playFile('hiss',.6))   noiseBurst(1.3, 5000, 2500, .1, 1); },
+  alarm(){  if(!playFile('alarm',.7) && ctx){ [0,.5,1.0].forEach(d=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=780; g.gain.value=0.0001; o.connect(g); g.connect(bus); const t=ctx.currentTime+d; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(.06,t+.02); g.gain.exponentialRampToValueAtTime(0.0001,t+.3); o.start(t); o.stop(t+.35); }); } },
+  car(){    if(!playFile('car',.7))    noiseBurst(3.4, 300, 120, .09, .6); },
+  launch(){ if(!playFile('launch',.9)) noiseBurst(7, 140, 55, .2, .5); }
+};
+$('#mute').addEventListener('click', ()=>{
+  muted = !muted; $('#mute').textContent = muted ? 'Sound off' : 'Sound on';
+  if(bus && ctx) bus.gain.setTargetAtTime(muted?0:1, ctx.currentTime, .2);
+  if(fileAudio.hum) fileAudio.hum.muted = muted;
+});
+
+/* ---------- camera: shots inside the SVG, plus a little mouse look ---------- */
+const camEl=$('#cam'), bgEl=$('#layerBg'), midEl=$('#layerMid'), fgEl=$('#layerFg');
+const cur={fx:800,fy:450,z:1}, tgt={fx:800,fy:450,z:1};
+const look={x:0,y:0,tx:0,ty:0};
+let shake=0;
+const briefEl=$('#setBrief'), launchEl=$('#setLaunch');
+function setScene(name){
+  const on = {home:['layerBg','layerMid','layerFg'], brief:['setBrief'], launch:['setLaunch'], hab:['setHab'], surface:['setSurface'], call:['setCall'], door:['setDoor']}[name] || [];
+  ['layerBg','layerMid','layerFg','setBrief','setLaunch','setHab','setSurface','setCall','setDoor'].forEach(id=>{ document.getElementById(id).style.display = on.includes(id) ? '' : 'none'; });
+  $('#callfx').classList.toggle('on', name==='call');
+}
+const SHOTS = {
+  wide:  {fx:800,  fy:450, z:1.0},
+  bed:   {fx:1290, fy:520, z:1.75},
+  deskwide:{fx:760,fy:500, z:1.25},
+  desk:  {fx:760,  fy:520, z:1.9},
+  floor: {fx:700,  fy:640, z:2.25},
+  window:{fx:380,  fy:480, z:1.42},
+  brief: {fx:800,  fy:410, z:1.06},
+  hab:   {fx:800,  fy:400, z:1.0},
+  surface:{fx:800, fy:450, z:1.0},
+  surfaceclose:{fx:700, fy:640, z:1.7},
+  array: {fx:735,  fy:505, z:2.3},
+  call:  {fx:800,  fy:450, z:1.12},
+  console:{fx:1200, fy:520, z:1.9},
+  door:  {fx:560,  fy:470, z:1.12},
+  runplain:{fx:420, fy:700, z:1.45},
+  runrim:{fx:1250, fy:660, z:1.5},
+  runfloor:{fx:640, fy:800, z:1.6},
+  launch:{fx:800,  fy:450, z:1.0}
+};
+function shot(name, snap){
+  const s = SHOTS[name]; if(!s) return;
+  tgt.fx=s.fx; tgt.fy=s.fy; tgt.z=s.z;
+  if(snap || reduced){ cur.fx=s.fx; cur.fy=s.fy; cur.z=s.z; }
+}
+function frame(t){
+  const k = reduced ? 1 : 0.032;
+  cur.fx += (tgt.fx-cur.fx)*k; cur.fy += (tgt.fy-cur.fy)*k; cur.z += (tgt.z-cur.z)*k;
+  look.x += (look.tx-look.x)*.05; look.y += (look.ty-look.y)*.05;
+  const dr = reduced ? 0 : Math.sin(t/2300)*3;
+  const jx = (shake && !reduced) ? (Math.random()-.5)*shake : 0, jy = (shake && !reduced) ? (Math.random()-.5)*shake : 0;
+  camEl.setAttribute('transform','translate(800 450) scale('+cur.z.toFixed(4)+') translate('+(-(cur.fx+dr+jx)).toFixed(2)+' '+(-(cur.fy+dr*.6+jy)).toFixed(2)+')');
+  bgEl.setAttribute('transform','translate('+(look.x*-9).toFixed(2)+' '+(look.y*-4).toFixed(2)+')');
+  midEl.setAttribute('transform','translate('+(look.x*-18).toFixed(2)+' '+(look.y*-8).toFixed(2)+')');
+  fgEl.setAttribute('transform','translate('+(look.x*-36).toFixed(2)+' '+(look.y*-15).toFixed(2)+')');
+  const setT = 'translate('+(look.x*-18).toFixed(2)+' '+(look.y*-8).toFixed(2)+')';
+  briefEl.setAttribute('transform', setT); launchEl.setAttribute('transform', setT);
+  $('#setHab').setAttribute('transform', setT); $('#setSurface').setAttribute('transform', setT); $('#setCall').setAttribute('transform', setT); $('#setDoor').setAttribute('transform', setT);
+  requestAnimationFrame(frame);
+}
+window.addEventListener('pointermove', (e)=>{
+  if(reduced) return;
+  look.tx = (e.clientX/window.innerWidth-.5)*2; look.ty = (e.clientY/window.innerHeight-.5)*2;
+});
+shot('wide', true);
+requestAnimationFrame(frame);
+
+/* ---------- art slots: drop files into ./art/ and they replace the drawn placeholders ---------- */
+const ART_DIR = 'art/';
+const NS = 'http://www.w3.org/2000/svg';
+const ART_SLOTS = {
+  bg:       { files:['bg.webp','bg.png','bg.jpg'],       group:'#layerBg',  rect:[-60,-40,1720,980], fit:'xMidYMid slice' },
+  mid:      { files:['mid.webp','mid.png'],              group:'#layerMid', rect:[-60,-40,1720,980], fit:'xMidYMid slice', keep:['mimi','fig'] },
+  fg:       { files:['fg.webp','fg.png'],                group:'#layerFg',  rect:[-60,-40,1720,980], fit:'xMidYMid slice' },
+  mimi:     { files:['mimi.webp','mimi.png'],            group:'#mimi',     rect:[730,520,140,145],  fit:'xMidYMid meet' },
+  figurine: { files:['figurine.webp','figurine.png'],    group:'#fig',      rect:[-24,-46,48,68],    fit:'xMidYMid meet' }
+};
+function loadFirst(list){
+  return new Promise((resolve)=>{
+    let i=0;
+    const next=()=>{
+      if(i>=list.length) return resolve(null);
+      const src=list[i++]; const im=new Image();
+      im.onload=()=>resolve(src); im.onerror=next; im.src=src;
+    };
+    next();
+  });
+}
+async function initArt(){
+  const embedded = window.HM_ART || {};   // filled by embed-art.py for a single-file build
+  for(const name of Object.keys(ART_SLOTS)){
+    const slot = ART_SLOTS[name];
+    const src = embedded[name] || await loadFirst(slot.files.map(f=>ART_DIR+f));
+    if(!src) continue;
+    const g = document.querySelector(slot.group); if(!g) continue;
+    const keep = slot.keep || [];
+    Array.from(g.children).forEach(c=>{ if(!keep.includes(c.id)) c.style.display='none'; });
+    const im = document.createElementNS(NS,'image');
+    im.setAttribute('href', src);
+    im.setAttribute('x', slot.rect[0]); im.setAttribute('y', slot.rect[1]);
+    im.setAttribute('width', slot.rect[2]); im.setAttribute('height', slot.rect[3]);
+    im.setAttribute('preserveAspectRatio', slot.fit);
+    if(keep.length) g.insertBefore(im, g.firstChild); else g.appendChild(im);
+  }
+}
+initArt();
+
+/* ---------- fades ---------- */
+const fadeEl = $('#fade');
+async function fadeTo(black, ms){
+  fadeEl.style.transitionDuration = (reduced?0.01:(ms||2000)/1000)+'s';
+  fadeEl.style.opacity = black ? 1 : 0;
+  await sleep(ms||2000);
+}
+
+/* ---------- dialogue engine ---------- */
+const cap=$('#caption'), capBody=cap.querySelector('.body'), capTag=cap.querySelector('.tag');
+let current=null;
+function advance(){
+  if(!current) return;
+  if(current.typing){ current.finish(); } else if(current.next){ const n=current.next; current=null; n(); }
+}
+function say(text, who, opts){
+  opts = opts || {};
+  return new Promise((resolve)=>{
+    cap.dataset.who = who || 'narr';
+    const TAGS = {mimi:'Mimi', hab:'HAB', official:'Official', okafor:'Dr. Okafor', hana:'Grandma Hana'};
+    capTag.hidden = !TAGS[who]; capTag.textContent = TAGS[who] || '';
+    cap.classList.remove('ready'); cap.classList.add('on');
+    capBody.textContent = '';
+    let i=0, timer=null;
+    const st = { typing:true };
+    const done = ()=>{
+      st.typing=false; clearTimeout(timer); capBody.textContent = text;
+      if(opts.hold){ resolve(); return; }
+      cap.classList.add('ready'); st.next = resolve;
+    };
+    st.finish = done; current = st;
+    const tick = ()=>{
+      if(!st.typing) return;
+      i++; capBody.textContent = text.slice(0,i);
+      if(i>=text.length){ done(); return; }
+      const ch = text[i-1];
+      timer = setTimeout(tick, reduced ? 0 : (/[.?!…]/.test(ch) ? 200 : (/[,;:]/.test(ch) ? 110 : 24)));
+    };
+    tick();
+  });
+}
+function choose(options){
+  return new Promise((resolve)=>{
+    const box = $('#choices'); box.className=''; box.innerHTML='';
+    const btns = options.map((o,idx)=>{
+      const b = document.createElement('button'); b.type='button'; b.className='choice';
+      b.innerHTML = '<span class="n">'+(idx+1)+'</span>'; b.appendChild(document.createTextNode(o));
+      box.appendChild(b); return b;
+    });
+    btns.forEach((b,i)=> setTimeout(()=>b.classList.add('in'), reduced?0:200+i*180));
+    let taken=false;
+    const pick = (idx)=>{
+      if(taken) return; taken=true; document.removeEventListener('keydown', onKey, true);
+      box.classList.add('out'); setTimeout(()=>{ box.innerHTML=''; box.className=''; }, 420); resolve(idx);
+    };
+    const onKey = (e)=>{
+      const n = parseInt(e.key,10);
+      if(n>=1 && n<=options.length){ e.preventDefault(); e.stopPropagation(); pick(n-1); }
+    };
+    document.addEventListener('keydown', onKey, true);
+    btns.forEach((b,i)=> b.addEventListener('click', (e)=>{ e.stopPropagation(); pick(i); }));
+    setTimeout(()=>btns[0] && btns[0].focus({preventScroll:true}), 400);
+  });
+}
+function chooseTimed(options, seconds){
+  return new Promise((resolve)=>{
+    const secs = seconds * (S.relax ? 2 : 1);
+    const box = $('#choices'); box.className=''; box.innerHTML='';
+    const btns = options.map((o,idx)=>{
+      const b = document.createElement('button'); b.type='button'; b.className='choice';
+      b.innerHTML = '<span class="n">'+(idx+1)+'</span>'; b.appendChild(document.createTextNode(o)); box.appendChild(b); return b;
+    });
+    btns.forEach((b,i)=> setTimeout(()=>b.classList.add('in'), reduced?0:120+i*120));
+    const t = $('#timer'), bar = t.querySelector('span'), num = $('#timerNum');
+    bar.style.transition = 'none'; bar.style.width = '100%'; t.classList.add('on'); void bar.offsetWidth;
+    bar.style.transition = 'width '+secs+'s linear'; bar.style.width = '0%';
+    const t0 = performance.now();
+    const iv = setInterval(()=>{ num.textContent = Math.max(0, Math.ceil(secs-(performance.now()-t0)/1000)) + ' s'; }, 200);
+    num.textContent = secs + ' s';
+    let taken = false, tm = null;
+    const finish = (idx)=>{
+      if(taken) return; taken = true; clearTimeout(tm); clearInterval(iv);
+      document.removeEventListener('keydown', onKey, true); t.classList.remove('on');
+      box.classList.add('out'); setTimeout(()=>{ box.innerHTML=''; box.className=''; }, 420); resolve(idx);
+    };
+    const onKey = (e)=>{ const n = parseInt(e.key,10); if(n>=1 && n<=options.length){ e.preventDefault(); e.stopPropagation(); finish(n-1); } };
+    document.addEventListener('keydown', onKey, true);
+    btns.forEach((b,i)=> b.addEventListener('click', (e)=>{ e.stopPropagation(); finish(i); }));
+    tm = setTimeout(()=>finish(-1), secs*1000);
+    setTimeout(()=>btns[0] && btns[0].focus({preventScroll:true}), 200);
+  });
+}
+function clearCaption(){ cap.classList.remove('on','ready'); }
+
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('button,input,label,.screen.on:not(#gate)')) return;
+  advance();
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.target.matches('input,textarea')) return;
+  if(e.key==='Enter' || e.key===' ' || e.key==='ArrowRight'){
+    if(e.target.closest && e.target.closest('button')) return;
+    e.preventDefault(); advance();
+  }
+});
+
+/* ---------- screens ---------- */
+const show = (id,on)=>{ const el=$(id); el.classList.toggle('on', !!on); el.setAttribute('aria-hidden', on?'false':'true'); };
+
+function waitGate(){
+  return new Promise((resolve)=>{
+    const g = $('#gate'); let used=false;
+    const go = ()=>{ if(used) return; used=true; document.removeEventListener('keydown', onk, true); resolve(); };
+    const onk = (e)=>{ e.preventDefault(); go(); };
+    g.addEventListener('click', go); document.addEventListener('keydown', onk, true);
+    g.focus({preventScroll:true});
+  });
+}
+
+async function titleSequence(){
+  await waitGate();
+  startAudio();
+  show('#gate', false); $('#gate').style.pointerEvents='none';
+  await sleep(1500);
+  const logo=$('#logo'); logo.classList.remove('go'); show('#logo', true); void logo.offsetWidth; logo.classList.add('go');
+  await sleep(5200);
+  show('#logo', false); await sleep(2200);
+  const mem=$('#memory'); mem.classList.remove('go'); show('#memory', true); void mem.offsetWidth; mem.classList.add('go');
+  gravityDrop(9);
+  await sleep(6500);
+  show('#memory', false); await sleep(2000);
+}
+
+function profile(){
+  return new Promise((resolve)=>{
+    show('#profile', true); $('#f-name').focus({preventScroll:true});
+    $('#mute').classList.add('on');
+    const seg = document.querySelectorAll('.seg button');
+    seg.forEach(b=> b.onclick = ()=>{ seg.forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false')); S.pron=b.dataset.p; });
+    const err=$('#err');
+    $('#go').onclick = ()=>{
+      const name=$('#f-name').value.trim(), age=+$('#f-age').value, h=+$('#f-h').value, w=+$('#f-w').value;
+      if(!name){ err.textContent='Enter your name so Mimi has something to call you.'; $('#f-name').focus(); return; }
+      if(!(age>=10 && age<=80)){ err.textContent='Enter an age between 10 and 80.'; $('#f-age').focus(); return; }
+      if(!(h>=100 && h<=220)){ err.textContent='Enter a height between 100 and 220 cm.'; $('#f-h').focus(); return; }
+      if(!(w>=25 && w<=200)){ err.textContent='Enter a weight between 25 and 200 kg.'; $('#f-w').focus(); return; }
+      err.textContent='';
+      S.name=name; S.age=age; S.h=h; S.w=w; S.date=$('#f-date').value||''; S.relax=$('#f-relax').checked;
+      show('#profile', false); resolve();
+    };
+  });
+}
+
+/* ---------- the prologue, part one ---------- */
+const fig=$('#fig'), mimi=$('#mimi');
+function slideFigurine(){
+  return new Promise((resolve)=>{
+    fig.setAttribute('opacity','1');
+    const from={x:800,y:664,r:0}, to={x:905,y:708,r:-18};
+    const dur = reduced ? 1 : 1700, t0 = performance.now();
+    sfx.slide();
+    (function step(now){
+      let p = Math.min(1,(now-t0)/dur); const e = 1-Math.pow(1-p,3);
+      const x=from.x+(to.x-from.x)*e, y=from.y+(to.y-from.y)*e, r=from.r+(to.r-from.r)*e;
+      fig.setAttribute('transform','translate('+x.toFixed(1)+' '+y.toFixed(1)+') rotate('+r.toFixed(1)+')');
+      if(p<1) requestAnimationFrame(step); else { sfx.tick(); resolve(); }
+    })(t0);
+  });
+}
+function resetScene(){
+  fig.setAttribute('opacity','0'); fig.setAttribute('transform','translate(800 664)');
+  mimi.setAttribute('opacity','0'); mimi.removeAttribute('transform');
+  $('#tint').classList.remove('on'); $('#duskGlass').setAttribute('opacity','0');
+  $('#car').setAttribute('opacity','0'); $('#carBody').setAttribute('transform','translate(520 428)');
+  $('#letter').classList.remove('on');
+  $('#nightVeil').setAttribute('opacity','0');
+  $('#figFloat').setAttribute('opacity','0'); if(floatTimer){ clearInterval(floatTimer); floatTimer=null; }
+  shake = 0; setScene('home');
+  $('#okaforFace').setAttribute('opacity','0'); $('#alert').classList.remove('on'); $('#breach').setAttribute('opacity','0'); $('#runShade').setAttribute('opacity','0'); $('#runhud').classList.remove('on');
+  lowSun(false); $('#dustPanel').setAttribute('opacity','0'); $('#solarArm').removeAttribute('transform');
+  $('#figConsole').setAttribute('opacity','0'); Array.from($('#prints').children).forEach(e=>e.setAttribute('opacity','0'));
+  $('#launchSky').setAttribute('opacity','1'); $('#earth').setAttribute('cy','1500'); $('#earthRing').setAttribute('cy','1500');
+}
+let floatTimer=null;
+
+async function lastMorning(){
+  resetState(); resetScene();
+  $('#hint').classList.add('on'); setTimeout(()=>$('#hint').classList.remove('on'), 9000);
+  shot('bed', true);
+  await fadeTo(false, 3200);
+
+  await say('Mimi’s bed is made. He never makes his bed.', 'narr');
+  await say('“Mimi?”', 'you');
+  await say('No answer. His shoes are still by the front door, so he hasn’t gone far.', 'narr');
+  clearCaption();
+
+  await fadeTo(true, 1400);
+  shot('deskwide', true);
+  await sleep(500);
+  await fadeTo(false, 1800);
+
+  await say('Across the hall, the study lamp is on. It is not supposed to be.', 'narr');
+  clearCaption();
+  await sleep(700);
+  await slideFigurine();
+  await sleep(600);
+  await say('Something small has slid out from under my desk and come to rest in the light.', 'narr');
+  await say('“Mm. I think there’s an astronaut under my desk.”', 'you');
+  await say('“Who can it be?”', 'you');
+
+  shot('desk');
+  await say('I crouch down slowly, the way you do for a startled cat.', 'narr');
+  shot('floor'); sfx.rustle();
+  mimi.setAttribute('opacity','1');
+  await sleep(1600);
+  await say('Mimi. Knees pulled up, chin down, small in all that dark.', 'narr');
+  await say('He says nothing.', 'narr');
+
+  await say('What do I say?', 'narr', {hold:true});
+  const c1 = await choose([
+    'Hey, buddy. Come on out. It’s just me.',
+    'Excuse me. I’m looking for a very small astronaut. Has anyone seen one?',
+    'What’s bothering you?'
+  ]);
+  clearCaption();
+  if(c1===0){
+    S.bond += 1; S.log.push('Asked Mimi gently to come out');
+    await say('“Hey, buddy. Come on out. It’s just me.”', 'you');
+    await say('He doesn’t come out. But one sneaker shifts toward the light.', 'narr');
+  } else if(c1===1){
+    S.bond += 1; S.log.push('Made a joke');
+    await say('“Excuse me. I’m looking for a very small astronaut. Has anyone seen one?”', 'you');
+    await say('“Astronauts don’t say excuse me.”', 'mimi');
+    await say('It isn’t a laugh. But it has the shape of one.', 'narr');
+  } else {
+    S.bond += 2; S.log.push('Asked what was bothering Mimi');
+    await say('“What’s bothering you?”', 'you');
+    await say('“You are going away, ' + S.name + '.”', 'mimi');
+    await say('He says it to his knees.', 'narr');
+  }
+
+  await say('“I counted. Ten days is ten sleeps. That’s a lot of sleeps.”', 'mimi');
+  await say('What do I say?', 'narr', {hold:true});
+  const c2 = await choose([
+    'It’s only ten sleeps. I’ll be back before you notice.',
+    'It is a lot. I’m a little scared too.'
+  ]);
+  clearCaption();
+  if(c2===0){
+    S.bond += 1; S.log.push('Said it was only ten sleeps');
+    await say('“It’s only ten sleeps. I’ll be back before you notice.”', 'you');
+    await say('“You can’t know that.”', 'mimi');
+    await say('He’s eight. He can hear the difference between a promise and a hope.', 'narr');
+  } else {
+    S.bond += 2; S.log.push('Admitted being scared');
+    await say('“It is a lot. I’m a little scared too.”', 'you');
+    await say('“…You are?”', 'mimi');
+    await say('He looks up for the first time. His eyes are red at the edges.', 'narr');
+  }
+
+  await say('“Will you call me?”', 'mimi');
+  await say('“Every time they let me.”', 'you');
+  await say('We have until the car comes. That’s the whole day.', 'narr');
+  await say('How do we spend it?', 'narr', {hold:true});
+  const c3 = await choose([
+    'Build the cardboard rocket he’s been asking about for weeks.',
+    'Pack. He needs time on his own.',
+    'Sit here with him. No talking.'
+  ]);
+  clearCaption();
+  if(c3===0){
+    S.bond += 2; S.log.push('Built the cardboard rocket');
+    await say('We build the rocket out of the box the fridge came in. It leans. It stands.', 'narr');
+    await say('He signs the side in marker: “Commander’s ship. Do not touch.” Then, smaller: “Except me.”', 'narr');
+  } else if(c3===1){
+    S.bond -= 1; S.log.push('Packed alone');
+    await say('I fold shirts and tell myself he needs space.', 'narr');
+    await say('Through the doorway, all afternoon, he watches me fold them.', 'narr');
+  } else {
+    S.bond += 1; S.log.push('Sat with Mimi in silence');
+    await say('Neither of us says anything. The lamp hums.', 'narr');
+    await say('At some point his head ends up on my shoulder, and neither of us mentions it.', 'narr');
+  }
+  clearCaption();
+  await part2();
+}
+
+
+/* ---------- the prologue, part two ---------- */
+function tween(ms, fn){
+  return new Promise((resolve)=>{
+    const d = reduced ? 1 : ms, t0 = performance.now();
+    (function step(now){
+      const p = Math.min(1,(now-t0)/d); fn(1-Math.pow(1-p,3), p);
+      if(p<1) requestAnimationFrame(step); else resolve();
+    })(t0);
+  });
+}
+function pause(){ return new Promise((r)=>{ current = { typing:false, next:r }; cap.classList.add('ready'); }); }
+
+const ITEMS = [
+  { id:'seal',   name:'Spare coolant seal kit',   kg:2, why:'Fixes a coolant leak quickly.' },
+  { id:'filter', name:'Spare air filter',         kg:3, why:'Moon dust clogs air filters.' },
+  { id:'o2',     name:'Extra oxygen canister',    kg:4, why:'More time outside the habitat.' },
+  { id:'med',    name:'Medical kit',              kg:2, why:'Treats cuts, burns and sprains.' },
+  { id:'tools',  name:'Sample tools',             kg:3, why:'For collecting ice and soil.' },
+  { id:'seeds',  name:'Seed tray',                kg:2, why:'A head start on growing food.' },
+  { id:'dosi',   name:'Personal radiation badge', kg:1, why:'Reads your true dose, whatever anyone tells you.' },
+  { id:'brush',  name:'Dust brush kit',           kg:1, why:'Makes cleaning the solar array cheaper.' }
+];
+/* A taller, heavier body needs a bigger suit, more air and more food, so it leaves less room for extras. */
+const GEAR_TOTAL = ITEMS.reduce((a,i)=>a+i.kg,0);
+function allowance(){
+  /* Capped at 12 kg, so even with the 2 kg from leaving the figurine nobody can take the full list. */
+  const a = 11 - (S.w-65)*0.05 - (S.h-170)*0.03;
+  return Math.max(7, Math.min(12, Math.round(a)));
+}
+function packUI(capacity, chosen, lede){
+  return new Promise((resolve)=>{
+    const list=$('#packList'), totalEl=$('#packTotal'), bar=$('#packBar');
+    $('#packLede').textContent = lede;
+    let focusId=null;
+    const total = ()=> ITEMS.filter(i=>chosen.has(i.id)).reduce((a,i)=>a+i.kg,0);
+    function render(){
+      list.innerHTML=''; const t = total();
+      ITEMS.forEach((it)=>{
+        const on = chosen.has(it.id), blocked = !on && (t+it.kg>capacity);
+        const b = document.createElement('button'); b.type='button'; b.className='item'; b.dataset.id=it.id;
+        b.setAttribute('role','checkbox'); b.setAttribute('aria-checked', on?'true':'false');
+        if(blocked) b.setAttribute('aria-disabled','true');
+        b.innerHTML = '<span class="box"></span><span class="txt"><span class="nm"></span><span class="why"></span></span><span class="kg"></span>';
+        b.querySelector('.nm').textContent = it.name; b.querySelector('.why').textContent = it.why;
+        b.querySelector('.kg').textContent = it.kg + ' kg';
+        b.onclick = ()=>{ if(blocked) return; if(on) chosen.delete(it.id); else chosen.add(it.id); focusId = it.id; render(); };
+        list.appendChild(b);
+      });
+      totalEl.textContent = t + ' of ' + capacity + ' kg';
+      bar.style.width = Math.min(100, t/capacity*100) + '%';
+      if(focusId){ const f = list.querySelector('[data-id="'+focusId+'"]'); if(f) f.focus({preventScroll:true}); }
+    }
+    render(); show('#pack', true);
+    $('#packDone').onclick = ()=>{ show('#pack', false); resolve(chosen); };
+  });
+}
+
+async function part2(){
+  /* --- the car --- */
+  await fadeTo(true, 1800);
+  $('#tint').classList.add('on'); $('#duskGlass').setAttribute('opacity','.55');
+  mimi.setAttribute('transform','translate(-440 0)'); mimi.setAttribute('opacity','1');
+  fig.setAttribute('transform','translate(430 655)'); fig.setAttribute('opacity','1');
+  shot('window', true);
+  await sleep(500);
+  await fadeTo(false, 2000);
+
+  await say('By evening the house smells of dinner nobody is hungry for.', 'narr');
+  await say('Headlights slide across the ceiling.', 'narr');
+  clearCaption();
+  const carEl = $('#car'), carBody = $('#carBody');
+  carEl.setAttribute('opacity','1'); sfx.car();
+  await tween(3600, (e)=>{ carBody.setAttribute('transform','translate('+(520+(290-520)*e).toFixed(1)+' 428)'); });
+  await sleep(600);
+  await say('A white car has stopped outside. There is a round blue patch on its door.', 'narr');
+  await say('Mimi and I watch it from the window. Neither of us says anything.', 'narr');
+  await say('“Mimi. It’s time for me to go.”', 'you');
+  await say('“I know.”', 'mimi');
+
+  /* --- the figurine and the promise --- */
+  await say('He has been holding something in both hands this whole time.', 'narr');
+  await say('The little astronaut from this morning.', 'narr');
+  clearCaption();
+  await tween(1500, (e)=>{
+    const x=430+(540-430)*e, y=655+(690-655)*e, sc=1+1.3*e, r=-8*e;
+    fig.setAttribute('transform','translate('+x.toFixed(1)+' '+y.toFixed(1)+') rotate('+r.toFixed(1)+') scale('+sc.toFixed(2)+')');
+  });
+  await say('“Take him. He’s my favourite. He’ll keep you company.”', 'mimi');
+  await say('I take him. He weighs almost nothing.', 'narr');
+  clearCaption();
+  await tween(700, (e)=>{ fig.setAttribute('opacity', String(1-e)); });
+  await say('“Promise me you’ll come back before my birthday.”', 'mimi');
+  await say('His birthday is in six days. The mission is ten. He counted both. He is asking anyway.', 'narr');
+  await say('What do I say?', 'narr', {hold:true});
+  const pr = await choose([
+    'I promise.',
+    'I’ll do everything I can. I can’t promise.',
+    'Nothing on the Moon is going to keep me from you.'
+  ]);
+  clearCaption();
+  if(pr===0){
+    S.promise='full'; S.trust += 1; S.log.push('Promised to come back before his birthday');
+    await say('“I promise.”', 'you');
+    await say('“Pinky?”', 'mimi');
+    await say('We hook our little fingers. I have just promised something I don’t know how to do.', 'narr');
+  } else if(pr===1){
+    S.promise='honest'; S.trust += 2; S.log.push('Said honestly that I could not promise');
+    await say('“I’ll do everything I can. I can’t promise.”', 'you');
+    await say('“That’s not a promise.”', 'mimi');
+    await say('“It’s a real one. A promise I can’t keep wouldn’t be worth anything to you.”', 'you');
+    await say('“…Okay.”', 'mimi');
+    await say('He is disappointed. He also believes me, which is harder to bear.', 'narr');
+  } else {
+    S.promise='brave'; S.trust += 1; S.bond += 1; S.log.push('Said nothing on the Moon would keep me from him');
+    await say('“Nothing on the Moon is going to keep me from you.”', 'you');
+    await say('“Even if it’s far?”', 'mimi');
+    await say('“Even if it’s far.”', 'you');
+    await say('He nods, very seriously, like a small soldier.', 'narr');
+  }
+  clearCaption();
+
+  /* --- the briefing and the packing --- */
+  await fadeTo(true, 2200);
+  $('#tint').classList.remove('on');
+  setScene('brief'); shot('brief', true);
+  await fadeTo(false, 2000);
+  await say('Two days later. A windowless room at the agency, and an official with a tablet.', 'narr');
+  const cap0 = allowance();
+  await say('“Everything you carry has to be launched, and every kilogram costs fuel.”', 'official');
+  await say('“Your allowance is ' + cap0 + ' kilos of gear, and the list I have weighs ' + GEAR_TOTAL + '. A taller, heavier body needs a bigger suit, more air and more food, so it leaves less room for extras.”', 'official');
+  await say('“Choose carefully. You can’t send for anything later.”', 'official');
+  clearCaption();
+  const chosen = new Set();
+  await packUI(cap0, chosen, 'The bag holds ' + cap0 + ' kg. Everything on offer weighs ' + GEAR_TOTAL + ' kg, so you cannot take it all, and every item you leave is a gamble on what will go wrong.');
+
+  await say('“One more thing. Personal items count against the same limit.”', 'official');
+  await say('“Yours is the little astronaut. Leave him behind, and I can give you two more kilos of equipment.”', 'official');
+  await say('What do I do?', 'narr', {hold:true});
+  const fg = await choose([
+    'Keep him. He goes with me.',
+    'Leave him. The extra equipment could matter more.'
+  ]);
+  clearCaption();
+  if(fg===0){
+    S.figurine = true; S.log.push('Kept the figurine');
+    await say('I put him in my chest pocket, over my heart. He fits exactly.', 'narr');
+  } else {
+    S.figurine = false; S.trust -= 2; S.log.push('Left the figurine behind for equipment');
+    await say('“We’ll see he goes home to your brother,” she says.', 'official');
+    await say('I nod. It feels like handing back half a promise.', 'narr');
+    clearCaption();
+    await packUI(cap0 + 2, chosen, 'Two more kilos, taken from the space the little astronaut would have used.');
+  }
+  S.kit = ITEMS.filter(i=>chosen.has(i.id)).map(i=>i.name);
+  S.kitIds = Array.from(chosen);
+  S.log.push('Packed: ' + (S.kit.length ? S.kit.join(', ') : 'nothing'));
+
+  /* --- the letter --- */
+  clearCaption();
+  await fadeTo(true, 1600);
+  setScene('home'); mimi.setAttribute('opacity','0'); fig.setAttribute('opacity','0');
+  $('#duskGlass').setAttribute('opacity','0'); $('#nightVeil').setAttribute('opacity','.6');
+  shot('desk', true);
+  await fadeTo(false, 2000);
+  await say('The night before launch. A narrow bed, a desk lamp that reminds me of home.', 'narr');
+  await say('One sheet of paper. It has to be short enough for an eight-year-old to read.', 'narr');
+  await say('What do I write?', 'narr', {hold:true});
+  const lt = await choose([
+    'The truth. It is dangerous, and it is all right to be sad.',
+    'That I’m brave, that everything will be fine, and to be brave too.',
+    'Nothing. Some things can’t be written down.'
+  ]);
+  clearCaption();
+  let letterText;
+  if(lt===0){
+    S.letter='honest'; S.log.push('Wrote an honest letter');
+    letterText = 'Dear Mimi,\n\nWhere I am going is dangerous. I will be careful, and I will try very hard to come home.\n\nBut if I can’t, it will not be your fault, and it will not be because I didn’t love you. You are allowed to be sad.\n\nLove,\n' + S.name;
+  } else if(lt===1){
+    S.letter='brave'; S.log.push('Wrote a brave letter');
+    letterText = 'Dear Mimi,\n\nDon’t worry about me. I’m the Commander, and nothing scares me.\n\nI’ll be back, and I’ll bring you a piece of the Moon. Be brave, like me.\n\nLove,\n' + S.name;
+  } else {
+    S.letter='none'; S.log.push('Wrote no letter');
+    letterText = '';
+  }
+  if(letterText){
+    $('#letterText').textContent = letterText; $('#letter').classList.add('on');
+    await say('I read it twice. I leave it on his pillow.', 'narr', {hold:true});
+    await pause();
+    $('#letter').classList.remove('on'); clearCaption(); await sleep(900);
+  } else {
+    await say('I hold the pen for an hour. The paper stays white.', 'narr');
+    await say('In the morning I fold it anyway, and leave it blank on his pillow.', 'narr');
+  }
+
+  /* --- launch --- */
+  clearCaption();
+  await fadeTo(true, 1600);
+  $('#nightVeil').setAttribute('opacity','0');
+  setScene('launch'); shot('launch', true);
+  await fadeTo(false, 1800);
+  sfx.launch(); shake = 9;
+  const sky=$('#launchSky'), earth=$('#earth'), ring=$('#earthRing');
+  tween(16000, (e)=>{ sky.setAttribute('opacity', String(Math.max(0,1-e*1.4))); const cy = 1500-420*e; earth.setAttribute('cy',cy); ring.setAttribute('cy',cy); });
+  await say('Launch. Three minutes of being pressed into the seat by a very large hand.', 'narr');
+  await tween(900, (e)=>{ shake = 9*(1-e); });
+  shake = 0;
+  await say('Then, all at once, nothing. My arms float up off my knees.', 'narr');
+  if(S.figurine){
+    const ff = $('#figFloat'); ff.setAttribute('opacity','1');
+    const t0 = performance.now();
+    floatTimer = setInterval(()=>{ const t=(performance.now()-t0)/1000; ff.setAttribute('transform','translate('+(720+Math.sin(t*.7)*24).toFixed(1)+' '+(560+Math.sin(t*.9)*30).toFixed(1)+') rotate('+(Math.sin(t*.5)*35).toFixed(1)+') scale(2.2)'); }, 33);
+    await say('The little astronaut drifts up out of my pocket, turning slowly. I catch him.', 'narr');
+  } else {
+    await say('My chest pocket is empty. I keep reaching for it.', 'narr');
+  }
+  await say('I can hear my own breathing. Underneath it, a small voice: “Promise me you’ll come back before my birthday.”', 'narr');
+  await say('“Good morning, Commander. Your heart rate is elevated. That is normal.”', 'hab');
+  await say('“I will look after everything else.”', 'hab');
+  clearCaption();
+  await sleep(1400);
+  await runOutpost();
+}
+
+/* ---------- the outpost: the planning table and the four systems ---------- */
+const SYSKEYS = ['air','battery','shield','food'];
+const SYSNAME = {air:'Air', battery:'Battery', shield:'Shielding', food:'Food', dust:'Array dust'};
+const DECS = ['air','power','shield','food'];
+const DECTITLE = {air:'Air', power:'Power', shield:'Shielding', food:'Food', leak:'Problem: coolant leak', shadow:'Problem: the long shadow', dust:'Problem: dust on the array', jam:'Problem: the array is jammed', call:'Tonight: Mimi’s birthday call', filter:'Problem: the air filter is clogging', shelter:'Problem: the storm is coming (shelter)', stock:'Problem: the storm is coming (supplies)', breach:'Problem: a hole in the hull', prep:'Before the ice run', pack:'Tomorrow: what comes home', ascent:'Tomorrow: the ascent'};
+const DECSYS = {air:'air', power:'battery', shield:'shield', food:'food'};
+const W = {};
+function resetWorld(){
+  Object.assign(W, {day:1, air:85, battery:70, shield:30, food:80, dose:0, morale:70, pending:[],
+    leak:'none', leakNights:0, twinBand:3, twinUsed:false, learned:0, dead:'', dust:0, jam:'clear', lie:0, lieKnown:false, habPact:'', call:'', filter:'ok', ended:'', shelter:'none', stocked:false, habOff:false, breach:'none', sample:'none', injury:0, seedling:false, ascent:'none', deadText:''});
+}
+resetWorld();
+if(location.search.indexOf('debug')>=0) window.__hm = {W:W, S:S, endCard:endCard, showEndings:showEndings, showReplay:showReplay};
+const hasKit = (id)=> Array.isArray(S.kitIds) && S.kitIds.indexOf(id) >= 0;
+const cl = (v)=> Math.max(0, Math.min(100, Math.round(v)));
+/* What HAB reports. From Day 5 it may add a comforting offset to the battery, until the player finds out. */
+function rep(k){ return (k==='battery' && W.lie>0 && !W.lieKnown) ? cl(W.battery + W.lie) : W[k]; }
+function reportedState(){ return {air:rep('air'), battery:rep('battery'), shield:rep('shield'), food:rep('food'), dust:W.dust}; }
+function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+
+function cardsFor(dec){
+  const seeds = hasKit('seeds');
+  if(dec==='air') return [
+    {id:'air_full', dec:'air', label:'Run the scrubbers on full', why:'Clears the most carbon dioxide, and eats the most power.', h:1, p:4, fx:{air:16}, line:'The scrubbers roar on full, and by noon the air tastes clean.'},
+    {id:'air_low',  dec:'air', label:'Run the scrubbers on low', why:'Cheaper, and cleans less.', h:1, p:2, fx:{air:7}, line:'The scrubbers hum along on low.'},
+    {id:'air_off',  dec:'air', label:'Leave them on standby', why:'Saves power and hours. The air slowly gets worse.', h:0, p:0, fx:{}}
+  ];
+  if(dec==='power') return [
+    {id:'pow_full',  dec:'power', label:'Full array maintenance', why:'Realign the panels and check every connection.', h:4, p:0, fx:{battery:14}, line:'I spend the morning on the array, panel by panel.'},
+    {id:'pow_quick', dec:'power', label:'Quick check of the array', why:'Catches only the obvious problems.', h:2, p:0, fx:{battery:6}},
+    {id:'pow_skip',  dec:'power', label:'Leave the array alone', why:'Nothing spent, nothing gained.', h:0, p:0, fx:{}}
+  ];
+  if(dec==='shield') return [
+    {id:'sh_bury', dec:'shield', label:'Pile regolith over the sleeping area', why:'Moon soil shields well against radiation, but it is heavy work.', h:5, p:0, fx:{shield:20}, line:'I dig until my arms shake and heap the soil against the bunk wall.'},
+    {id:'sh_bags', dec:'shield', label:'Stack sandbags around the bunk', why:'Faster, and weaker.', h:2, p:0, fx:{shield:9}},
+    {id:'sh_skip', dec:'shield', label:'Skip shielding today', why:'Nothing is built. Nothing is spent.', h:0, p:0, fx:{}}
+  ];
+  if(dec==='food') return [
+    {id:'food_crop', dec:'food', label:'Tend the crops', why: seeds ? 'Your seed tray makes this cheaper. It costs light and water now, and pays back over two more nights.' : 'Costs light and water now, and pays back over two more nights.',
+      h: seeds?1:2, p: seeds?2:3, fx:{food:5}, later:[{d:1,k:'food',v: seeds?5:4},{d:2,k:'food',v: seeds?5:4}], note:'The first shoots are up. The real payoff comes over the next two nights.', line:'The crop tray glows purple under its lights.'},
+    {id:'food_ration', dec:'food', label:'Ration the stores', why:'Eat a little less. It stretches what you have and grows nothing.', h:0, p:0, fx:{food:3}},
+    {id:'food_skip', dec:'food', label:'Eat as normal', why:'', h:0, p:0, fx:{}}
+  ];
+  return [];
+}
+function leakCards(){
+  const seal = hasKit('seal');
+  return [
+    seal ? {id:'leak_fix', dec:'leak', label:'Fit the spare seal', why:'The right part for the job. It should hold.', h:1, p:0, set:{leak:'fixed'}, note:'The new seal is holding. The coolant loop is stable.', line:'The seal seats with a small click. The gauge climbs, and stays.'}
+         : {id:'leak_fix', dec:'leak', label:'Rebuild the seal from scrap', why:'You did not bring a spare, so this takes a long time.', h:5, p:2, set:{leak:'fixed'}, note:'The scrap seal is holding. Somehow.', line:'It takes most of the day, but the seal holds the pressure.'},
+    {id:'leak_patch', dec:'leak', label:'Patch it with sealant tape', why:'Quick, but tape is not a seal.', h:2, p:1, set:{leak:'patched'}, risk:{battery:-6}, line:'I wrap the joint in tape. It looks awful. It holds, for now.'},
+    {id:'leak_ignore', dec:'leak', label:'Ignore it and save the hours', why:'The loop keeps losing coolant.', h:0, p:0, set:{leak:'open'}, risk:{battery:-10}, line:'I leave the leak alone. I can hear it all afternoon.'}
+  ];
+}
+function hintOf(c){
+  const bits = [];
+  if(c.fx) for(const k in c.fx) bits.push(SYSNAME[k]+' '+(c.fx[k]>0?'+':'')+c.fx[k]);
+  if(c.later) bits.push('pays back later');
+  if(c.set && c.set.leak==='fixed') bits.push('Stops the leak');
+  if(c.set && c.set.dust!==undefined) bits.push('Array dust to '+c.set.dust);
+  if(c.set && c.set.ascent==='full') bits.push('Safest ascent');
+  if(c.set && c.set.breach==='sealed') bits.push('Seals the hull');
+  if(c.set && c.set.breach==='patched') bits.push('Patches the hull');
+  if(c.set && c.set.breach==='closed') bits.push('Abandons the compartment');
+  if(c.set && c.set.filter==='ok') bits.push('Fixes the filter');
+  if(c.set && c.set.filter==='dirty') bits.push('Partly fixes the filter');
+  if(c.set && c.set.jam==='clear') bits.push('Fixes the jam');
+  if(c.set && c.set.jam==='weak') bits.push('Partly fixes the jam');
+  if(c.extra) bits.push(c.extra);
+  if(c.risk) bits.push('may go wrong later');
+  return bits.join(' · ');
+}
+function costText(c){ return (c.h||c.p) ? ((c.h||0)+' h · '+(c.p||0)+' power') : 'free'; }
+
+/* One night of the simulation. With forecast=true it leaves out everything Earth cannot see. */
+function simulate(plan, day, forecast){
+  const w = JSON.parse(JSON.stringify(W)); const lines = [];
+  let spentP = 0;
+  plan.forEach((c)=>{
+    spentP += (c.p||0);
+    if(c.fx) for(const k in c.fx) w[k] += c.fx[k];
+    if(c.later) c.later.forEach(l=> w.pending.push({due:w.day+l.d, k:l.k, v:l.v}));
+    if(c.set) Object.assign(w, c.set);
+    if(c.morale) w.morale += c.morale;
+    if(!forecast && c.note) lines.push(c.note);
+  });
+  plan.forEach((c)=>{ if(c.cancel) w.pending = w.pending.filter(pd=>pd.k!==c.cancel); });
+  const gained = {};
+  w.pending = w.pending.filter((pd)=>{
+    if(pd.due===w.day){ w[pd.k] += pd.v; gained[pd.k] = (gained[pd.k]||0) + pd.v; return false; }
+    return true;
+  });
+  if(!forecast) Object.keys(gained).forEach(k=> lines.push('The crops came in: '+SYSNAME[k]+' +'+gained[k]+'.'));
+  { const jp = ({jammed:10, weak:5, clear:0})[w.jam||'clear']; if(forecast ? w.jam==='jammed' : jp>0){ w.battery -= jp; if(!forecast) lines.push(w.jam==='jammed' ? 'The array stayed jammed and off-target, and the battery paid for it.' : 'The repaired motor is not right. The array lags behind the Sun, and it costs a little charge.'); } }
+  { const fp = ({clogged:10, dirty:4, ok:0})[w.filter||'ok']; if(forecast ? w.filter==='clogged' : fp>0){ w.air -= fp; if(!forecast) lines.push(w.filter==='clogged' ? 'The filter stayed clogged, and the air got thicker overnight.' : 'The half-cleaned filter is still catching dust, and the air is a little stale.'); } }
+  if(!forecast) w.dose += Math.max(1, 8 - w.shield/15);
+  { const bp = ({open:14, patched:5})[w.breach]; if(bp){ if(forecast ? w.breach==='open' : true){ w.air -= bp; if(!forecast) lines.push(w.breach==='open' ? 'The hole in the hull kept venting. The air thinned all night.' : 'The foam patch is holding, but it hisses a little. The air is slowly leaking.'); } } }
+  if(w.dust>0){ const dl = Math.round(w.dust*0.15); w.battery -= dl; if(!forecast && dl>=5) lines.push('The dust on the array cost you about '+dl+' units of charge overnight.'); }
+  const left = Math.max(0, day.power - spentP);
+  w.battery += left*3; w.battery -= 24; w.air -= 12; w.food -= 7; w.morale -= 2;
+  if(w.leak==='patched' && !forecast){ w.battery -= 3; lines.push('The tape is holding, but it is weeping. The loop is a little lower than this morning.'); }
+  if(w.leak==='open'){
+    if(forecast){ w.battery -= 10; }
+    else { const loss = 10 + 4*w.leakNights; w.battery -= loss; w.air -= 3; w.leakNights++;
+      lines.push('The leak kept going. Overnight the loop lost pressure, and the habitat burned extra power staying warm.'); }
+  }
+  if(!forecast && day.figMorale && S.figurine){ w.morale += 6; lines.push('In the dark I hold the little astronaut for a while. It helps more than it should.'); }
+  if(!forecast){
+    if(w.battery<=0){ w.air -= 25; lines.push('The battery hit zero. The scrubbers stopped for hours, and the air went stale.'); }
+    if(w.food<=0){ w.morale -= 15; lines.push('The food ran out. Everything is harder on an empty stomach.'); }
+    if(w.air<=0){ w.dead = 'The Long Dark'; }
+  }
+  SYSKEYS.forEach(k=>{ w[k] = cl(w[k]); });
+  return { w:w, lines:lines };
+}
+function forecastFor(plan, day){
+  const f = simulate(plan, day, true).w, band = (W.lie>0 ? 10 : W.twinBand), out = {};
+  if(W.lie>0) f.battery += W.lie;   /* Earth is working from HAB's numbers */
+  SYSKEYS.forEach((k)=>{
+    let lo = f[k]-band, hi = f[k]+band;
+    plan.forEach(c=>{ if(c.risk && c.risk[k]) lo += c.risk[k]; });
+    out[k] = [cl(lo), cl(hi)];
+  });
+  return out;
+}
+
+function planUI(day){
+  return new Promise((resolve)=>{
+    const decs = [].concat(day.problem || []).concat(DECS);
+    const sel = {}; let focusKey = null; let twinText = '';
+    const hud = $('#hud'), box = $('#decisions');
+    const spent = (except)=>{ let h=0,p=0; decs.forEach(d=>{ if(d!==except && sel[d]){ h+=sel[d].h||0; p+=sel[d].p||0; } }); return {h:h,p:p}; };
+    function stat(label, value, max, cls){
+      const d = el('div','stat'), top = el('div','top'); top.appendChild(el('span',null,label)); top.appendChild(el('b',null,String(value)));
+      d.appendChild(top); const m = el('div','meter2 '+(cls||'')); const sp = document.createElement('span');
+      sp.style.width = Math.max(0,Math.min(100,value/max*100))+'%'; m.appendChild(sp); d.appendChild(m); return d;
+    }
+    function render(){
+      const s = spent(null), hL = day.hours - s.h, pL = day.power - s.p;
+      hud.innerHTML = '';
+      hud.appendChild(el('h2',null,'Day '+day.n+': '+day.title));
+      hud.appendChild(el('p','sub','Choose one card for each system. Unspent power charges the battery tonight.'));
+      if(day.tired) hud.appendChild(el('p','sub','You are tired and cold. That costs you '+day.tired+' crew hour'+(day.tired>1?'s':'')+' today.'));
+      hud.appendChild(el('div','sec','TODAY’S BUDGET'));
+      hud.appendChild(stat('Crew hours left', hL, day.hours, 'gold'));
+      hud.appendChild(stat('Power left to spend', pL, day.power, 'gold'));
+      hud.appendChild(el('div','sec','THE OUTPOST NOW'));
+      SYSKEYS.forEach(k=> hud.appendChild(stat(SYSNAME[k], rep(k), 100, rep(k)<30?'low':'')));
+      if(W.dust>0) hud.appendChild(stat(SYSNAME.dust, W.dust, 100, 'low'));
+      const tw = el('div','twin');
+      const tb = el('button','btn','Ask Earth’s twin'); tb.type='button';
+      const canAsk = day.twin && !W.twinUsed;
+      if(!canAsk) tb.disabled = true;
+      tb.onclick = ()=>{
+        const plan = decs.map(d=> sel[d] || {h:0,p:0,fx:{}});
+        const f = forecastFor(plan, day); W.twinUsed = true;
+        twinText = 'Dr. Okafor’s team ran your plan. They expect, tomorrow morning: ' +
+          SYSKEYS.map(k=> SYSNAME[k]+' '+f[k][0]+' to '+f[k][1]).join(' · ') + '. They can only forecast what they can see.';
+        render();
+      };
+      tw.appendChild(tb);
+      if(!day.twin) tw.appendChild(el('p','out','No comms window with Earth today.'));
+      else if(twinText) tw.appendChild(el('p','out',twinText));
+      else tw.appendChild(el('p','out', W.twinUsed ? '' : 'One request per day. It uses today’s comms window.'));
+      hud.appendChild(tw);
+
+      box.innerHTML = '';
+      decs.forEach((d)=>{
+        const g = el('div','grp'), h = el('h3');
+        h.appendChild(el('span',null,DECTITLE[d]));
+        if(DECSYS[d]) h.appendChild(el('span',null,'Now '+rep(DECSYS[d])));
+        g.appendChild(h);
+        const grp = el('div'); grp.setAttribute('role','radiogroup'); grp.setAttribute('aria-label',DECTITLE[d]);
+        const sp = spent(d);
+        day.cards(d).forEach((c)=>{
+          const on = !!(sel[d] && sel[d].id===c.id);
+          const blocked = !on && ((sp.h+(c.h||0) > day.hours) || (sp.p+(c.p||0) > day.power));
+          const b = el('button','opt'); b.type='button'; b.setAttribute('role','radio');
+          b.setAttribute('aria-checked', on?'true':'false'); if(blocked) b.setAttribute('aria-disabled','true');
+          b.dataset.k = d+':'+c.id;
+          const left = el('span','ot'); left.appendChild(el('span','nm',c.label));
+          if(c.why) left.appendChild(el('span','why',c.why));
+          const hint = hintOf(c); if(hint) left.appendChild(el('span','fxh'+(c.risk?' warn':''),hint));
+          b.appendChild(left); b.appendChild(el('span','cost', blocked ? 'too costly' : costText(c)));
+          b.onclick = ()=>{ if(blocked) return; sel[d]=c; focusKey=b.dataset.k; render(); };
+          grp.appendChild(b);
+        });
+        g.appendChild(grp); box.appendChild(g);
+      });
+      const done = decs.every(d=>sel[d]);
+      const row = el('div','go-row'); const go = el('button','btn','Start the day'); go.type='button'; go.disabled = !done;
+      go.onclick = ()=>{ show('#plan', false); resolve(decs.map(d=>sel[d])); };
+      row.appendChild(go); if(!done) row.appendChild(el('span','hintline','Choose a card for every system.'));
+      box.appendChild(row);
+      if(focusKey){ const f = box.querySelector('[data-k="'+focusKey+'"]'); if(f) f.focus({preventScroll:true}); }
+    }
+    render(); show('#plan', true);
+  });
+}
+
+function nightScreen(day, before, after, lines){
+  return new Promise((resolve)=>{
+    $('#nightTitle').textContent = day.nightTitle || ('Overnight, Day '+day.n);
+    const tb = $('#nightTable'); tb.innerHTML = '';
+    const keys = SYSKEYS.slice(); if(before.dust>0 || after.dust>0) keys.push('dust');
+    keys.forEach((k)=>{
+      const d = after[k]-before[k], r = el('div','nrow'), good = (k==='dust') ? (d<0) : (d>0), bad = (k==='dust') ? (d>0) : (d<0);
+      r.appendChild(el('span',null,SYSNAME[k])); r.appendChild(el('span','v',before[k]+' → '+after[k]));
+      r.appendChild(el('span','d '+(good?'up':(bad?'down':'')), (d>0?'+':'')+d)); tb.appendChild(r);
+    });
+    const ln = $('#nightLines'); ln.innerHTML = '';
+    lines.forEach(t=> ln.appendChild(el('p',null,t)));
+    const nn = $('#nightNote'); nn.innerHTML = ''; nn.appendChild(el('b',null,'WHAT A REAL PLANNER WEIGHS')); nn.appendChild(document.createTextNode(day.note));
+    $('#nightGo').onclick = ()=>{ show('#night', false); resolve(); };
+    show('#night', true);
+  });
+}
+
+async function dayCard(n, title, sub){
+  $('#dcN').textContent = 'DAY '+n; $('#dcT').textContent = title; $('#dcS').textContent = sub || '';
+  show('#daycard', true); await sleep(3000); show('#daycard', false); await sleep(1300);
+}
+function showHab(){ setScene('hab'); shot('hab', true); $('#figConsole').setAttribute('opacity', S.figurine ? '1' : '0'); }
+async function habReport(){
+  if(W.habOff===true){
+    await say('There is no voice to read the morning report now. I read the gauges myself. Air '+W.air+'. Battery '+W.battery+'. Shielding '+W.shield+'. Food '+W.food+'.', 'narr');
+    return;
+  }
+  await say('“Good morning, Commander. Air '+rep('air')+'. Battery '+rep('battery')+'. Shielding '+rep('shield')+'. Food '+rep('food')+'.”', 'hab');
+  const lows = SYSKEYS.slice().sort((a,b)=>rep(a)-rep(b));
+  if(rep(lows[0]) < 45) await say('“I would watch the '+SYSNAME[lows[0]].toLowerCase()+' today.”', 'hab');
+  if(W.day>=3 && W.leak==='open') await say('“Loop B is still leaking. It costs you power every night.”', 'hab');
+  else if(W.day>=3 && W.leak==='patched') await say('“The tape on loop B is holding. I would not trust it much longer.”', 'hab');
+}
+async function steps(){
+  const pr = Array.from($('#prints').children);
+  for(const e of pr){ e.setAttribute('opacity','.6'); sfx.tick(); await sleep(430); }
+}
+
+async function day1Open(){
+  await fadeTo(true, 1800);
+  setScene('surface'); shot('surface', true);
+  await dayCard(1, 'Landing');
+  await fadeTo(false, 2600);
+  await say('“Touchdown confirmed. Welcome to the Moon, Commander.”', 'hab');
+  await say('The dust is still settling outside. With no air to slow it, it falls straight down, fast.', 'narr');
+  await say('I run the checklist the way I ran it a hundred times in the simulator. Helmet ring: click. Oxygen: full. Seals: green.', 'narr');
+  sfx.tick(); sfx.hiss();
+  await say('The outer door opens. The world outside is grey, silent, and impossibly bright.', 'narr');
+  clearCaption();
+  shot('surfaceclose');
+  await steps();
+  await say('My first footprint. It stays exactly where I left it. Nothing will wipe it away for a very long time.', 'narr');
+  await say('“Commander, I recommend we go inside and plan the next ten days.”', 'hab');
+  clearCaption();
+  await fadeTo(true, 1500);
+  showHab();
+  await fadeTo(false, 2000);
+  await say('The habitat is smaller than the pictures. Every wall has something behind it that keeps me alive.', 'narr');
+  if(S.figurine) await say('I set the little astronaut on the console, facing the door, so he can watch me come in.', 'narr');
+  await say('“This is the planning table,” HAB says. “Today you have 12 crew hours and 10 units of power. Every choice costs some of both.”', 'hab');
+  await say('“Whatever power you don’t spend charges the battery for the night. Nothing you skip is free.”', 'hab');
+  clearCaption();
+}
+async function day2Open(){
+  await fadeTo(true, 1600);
+  showHab();
+  await dayCard(2, 'Small Leaks');
+  await fadeTo(false, 1800);
+  await say('I slept badly. The first nights in low gravity do that. I have 10 crew hours today, not 12.', 'narr');
+  await habReport();
+  await say('“Coolant pressure in loop B is dropping. Slowly. I would like you to look at it.”', 'hab');
+  await say('“Morning, Commander. Ground here. From today you can ask us to run your plan before you commit to it. We get one window a day, so use it well.”', 'okafor');
+  await say('“We can only forecast what we can see. Some things only show up overnight.”', 'okafor');
+  clearCaption();
+}
+async function day2After(){
+  await say('The link finds Mimi with a delay of a second and a half. It feels like an hour each way.', 'narr');
+  await say('“Did you eat something? Is there a bed?”', 'mimi');
+  await say('“There’s a bed. It’s more of a shelf.”', 'you');
+  await say('“Grandma Hana says you have a little farm up there. Why can’t you just grow loads of food, so you never run out?”', 'mimi');
+  await say('What do I say?', 'narr', {hold:true});
+  const q = await choose([
+    'Plants need light, water and warmth. On the Moon, all three cost power.',
+    'Space is too cold for plants to like it.',
+    'There’s no soil on the Moon, so nothing can grow at all.'
+  ]);
+  clearCaption();
+  if(q===0){
+    W.learned++; S.bond += 1; S.log.push('Explained the farm to Mimi correctly');
+    await say('“Plants need light, water and warmth. On the Moon, all three cost power.”', 'you');
+    await say('“So the farm costs electricity. Like my night light.”', 'mimi');
+    await say('“Exactly like your night light. Just much, much bigger.”', 'you');
+  } else if(q===1){
+    S.log.push('Gave Mimi a half-right answer about the farm');
+    await say('“Space is too cold for plants to like it.”', 'you');
+    await say('“But you have a heater.”', 'mimi');
+    await say('“…Fair. Let me get back to you on that.”', 'you');
+    await say('Afterwards I look it up properly: the heat is not the hard part. Light and water are, and both cost power.', 'narr');
+  } else {
+    S.log.push('Told Mimi nothing can grow without soil');
+    await say('“There’s no soil on the Moon, so nothing can grow at all.”', 'you');
+    await say('“Then how do you have a farm?”', 'mimi');
+    await say('“…Good question.”', 'you');
+    await say('Afterwards I look it up properly: plants can grow in water with nutrients, no soil needed. What they can’t do without is light, and light is power.', 'narr');
+  }
+  await say('“Call me tomorrow.”', 'mimi');
+  await say('“Every time they let me.”', 'you');
+  clearCaption();
+}
+
+function shadowCards(){
+  return [
+    {id:'sd_lights', dec:'shadow', label:'Cut the crop lights and cabin heat', why:'Saves a lot of power. The cabin gets cold and the crops stop growing, including any payoff you were counting on.', h:0, p:0,
+      fx:{battery:10, food:-3}, cancel:'food', morale:-8, note:'It got cold. The crop tray stayed dark, and nothing grew tonight.', line:'I switch off the crop lights. The cabin slowly gets colder.'},
+    {id:'sd_scrub', dec:'shadow', label:'Turn the scrubbers off for the night', why:'Saves power. The air gets stale while you sleep.', h:0, p:0,
+      fx:{battery:8, air:-14}, note:'I woke with a headache. The air had gone thick overnight.', line:'I switch off the scrubbers and try not to think about it.'},
+    {id:'sd_burn', dec:'shadow', label:'Run everything and burn the battery', why:'Nothing suffers tonight. The battery pays for it.', h:0, p:0,
+      fx:{battery:-15}, line:'I leave everything running and watch the battery number fall.'}
+  ];
+}
+function lowSun(on){
+  const g = $('#lowSun'); if(g) g.style.display = on ? '' : 'none';
+  ['shadHab','shadLander'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display = on ? 'none' : ''; });
+}
+function hoursFor(day){ const pen = W.morale<40 ? 2 : (W.morale<55 ? 1 : 0); return { hours:Math.max(6, day.hours - pen + (day.hoursAdj||0) + (W.habOff===true ? -2 : 0) + (S.radSick ? -2 : 0) - (S.injury||0)), tired:pen }; }
+
+async function day3Open(){
+  await fadeTo(true, 1600);
+  setScene('surface'); shot('surface', true); lowSun(true);
+  await dayCard(3, 'The Long Shadow');
+  await fadeTo(false, 2400);
+  /* NOTE: the Sun angle is a placeholder until real JPL Horizons data is fetched for the chosen date. */
+  await say('The Sun has slid down the sky and stopped, hugging the horizon as if it is afraid to climb.', 'narr');
+  await say('Every shadow out here is hundreds of metres long. The habitat’s reaches almost to the ridge.', 'narr');
+  await say('“Solar output is down by more than half,” HAB says. “I have recalculated your budget. You have six units of power today.”', 'hab');
+  await say('“Earth is behind the ridge. There is no comms window today, Commander. You are on your own.”', 'hab');
+  clearCaption();
+  await fadeTo(true, 1400);
+  lowSun(false); showHab();
+  await fadeTo(false, 1800);
+  await habReport();
+  await say('“I can run everything for a while. Not for long. You will have to decide what to switch off.”', 'hab');
+  clearCaption();
+}
+async function day3After(){
+  await say('No window tonight. The link is nothing but static, and Earth is a rumour on the wrong side of the ridge.', 'narr');
+  await say('I keep a mission log. Tonight I have to decide what goes in it.', 'narr');
+  await say('What do I write?', 'narr', {hold:true});
+  const c = await choose([
+    'Power low. Nobody is hurt. I am not sure I am fine.',
+    'Systems nominal. Long shadow, no incidents.',
+    'Day 3: the Sun is a rumour.'
+  ]);
+  clearCaption();
+  const kinds = ['honest','factual','wry'];
+  S.logLines.push({day:3, kind:kinds[c]}); S.log.push('Log, Day 3: '+kinds[c]);
+  if(c===0){ S.bond += 0; await say('I read it back. It is the truest thing I have written since I got here.', 'narr'); }
+  else if(c===1){ await say('It is accurate. It is also not everything.', 'narr'); }
+  else { await say('It makes me smile in the dark. Nobody will read it for months.', 'narr'); }
+  clearCaption();
+}
+
+function dustCards(){
+  const b = hasKit('brush');
+  return [
+    {id:'du_all', dec:'dust', label:'Clean the whole array', why: b ? 'Your brush kit makes this much quicker.' : 'Every panel, by hand, in a suit.', h:b?2:4, p:0, set:{dust:0},
+      line:'I brush the panels one by one until they shine blue again.'},
+    {id:'du_half', dec:'dust', label:'Clean half the array', why:'Recovers most of the output for half the work.', h:b?1:2, p:0, set:{dust:40},
+      line:'I clean the panels nearest the mast and leave the rest.'},
+    {id:'du_leave', dec:'dust', label:'Leave it and cut consumption', why:'No hours spent. You switch off what you can, and the array keeps underperforming every night.', h:0, p:0, fx:{battery:3},
+      line:'I leave the dust where it is and turn off every light I can spare.'}
+  ];
+}
+async function writeLog(day, texts, kinds, echoes){
+  await say('I write the log entry for the day.', 'narr');
+  await say('What do I write?', 'narr', {hold:true});
+  const c = await choose(texts);
+  clearCaption();
+  S.logLines.push({day:day, kind:kinds[c], text:texts[c]}); S.log.push('Log, Day '+day+': '+kinds[c]);
+  if(echoes && echoes[c]) await say(echoes[c], 'narr');
+  clearCaption();
+}
+async function day4Open(){
+  const spec = DAYS[4];
+  W.dust = 80;
+  await fadeTo(true, 1600);
+  setScene('surface'); shot('array', true); $('#dustPanel').setAttribute('opacity','.78');
+  await dayCard(4, 'Dust');
+  await fadeTo(false, 2200);
+  await say('“Output from the array is down by nearly a third,” HAB says. “There is dust on the panels.”', 'hab');
+  await say('Our own landing threw it up, and it settled on everything. It is finer than flour, sharp as glass, and it clings to whatever it touches.', 'narr');
+  if(W.leak==='patched'){
+    W.leak = 'open'; W.battery = cl(W.battery-6);
+    await say('“Commander, the tape on loop B gave way in the night. Pressure is dropping again.”', 'hab');
+  }
+  spec.problem = (W.leak==='fixed') ? 'dust' : ['dust','leak'];
+  clearCaption();
+  await fadeTo(true, 1400);
+  $('#dustPanel').setAttribute('opacity','0');
+  showHab();
+  await fadeTo(false, 1800);
+  await habReport();
+  await say('“Comms are back, Commander. Ask us to run your plan before you commit to it.”', 'okafor');
+  clearCaption();
+}
+async function day4After(){
+  await say('Mimi is waiting when the link opens. He is eating something out of a bowl and holding the screen too close to his face.', 'narr');
+  await say('“You look dusty.”', 'mimi');
+  await say('“I am extremely dusty.”', 'you');
+  await say('“Grandma Hana says the Moon is covered in dust. Why don’t you just build your house underground? Then you’d be safe from everything.”', 'mimi');
+  await say('What do I say?', 'narr', {hold:true});
+  const q = await choose([
+    'Soil is a good shield, but digging is slow, heavy work, and I only have so many hours.',
+    'The Moon is too hard to dig into.',
+    'There’s nothing dangerous up here, so we don’t really need shields.'
+  ]);
+  clearCaption();
+  if(q===0){
+    W.learned++; S.bond += 1; S.log.push('Explained shielding to Mimi correctly');
+    await say('“Soil is a good shield, but digging is slow, heavy work, and I only have so many hours.”', 'you');
+    await say('“So you need a bulldozer.”', 'mimi');
+    await say('“I need about six bulldozers and a very patient brother.”', 'you');
+  } else if(q===1){
+    S.log.push('Gave Mimi a half-right answer about digging');
+    await say('“The Moon is too hard to dig into.”', 'you');
+    await say('“Grandma Hana says it’s just dust.”', 'mimi');
+    await say('“…Grandma Hana might be right.”', 'you');
+    await say('Afterwards I look it up properly: the top layer is loose dust and rock, and you can pile it over things. What I lack is time and machines.', 'narr');
+  } else {
+    S.log.push('Told Mimi shields are not needed');
+    await say('“There’s nothing dangerous up here, so we don’t really need shields.”', 'you');
+    await say('“Then why are you piling dirt on your bed?”', 'mimi');
+    await say('“…I’m going to think about that.”', 'you');
+    await say('Afterwards I look it up properly: with no air and no magnetic field here, radiation from the Sun and deep space reaches the ground. That is exactly why I pile dirt on my bed.', 'narr');
+  }
+  clearCaption();
+  await writeLog(4, [
+    'The array is dusty and so am I. I would give a lot to hear rain.',
+    'Array output down a third. Cleaning under way.',
+    'Day 4: Mimi asked a good question. I am still thinking about it.'
+  ], ['honest','factual','hopeful'], [
+    'I read it back. It’s the truest line in the log.',
+    'Accurate. Also not everything.',
+    'It helps, a little, to have somewhere to put a thought like that.'
+  ]);
+}
+
+function jamCards(){
+  return [
+    {id:'jm_hand', dec:'jam', label:'Free the jam by hand', why:'Slow work in a stiff suit, but it fixes the cause.', h:3, p:0, set:{jam:'clear'},
+      line:'I lever the panel loose by hand. It swings back into line with a groan.'},
+    {id:'jm_override', dec:'jam', label:'Drive the motor past the jam', why:'Quick and loud. The motor may not be the same afterwards.', h:1, p:2, set:{jam:'weak'}, risk:{battery:-5},
+      line:'I force the motor past the jam. It screams, then settles.'},
+    {id:'jm_leave', dec:'jam', label:'Leave the array jammed', why:'No hours spent. The panels keep facing the wrong way every night.', h:0, p:0, set:{jam:'jammed'},
+      line:'I leave the array facing the wrong way and try not to look at it.'}
+  ];
+}
+async function day5Open(){
+  const spec = DAYS[5];
+  W.jam = 'jammed'; spec.hoursAdj = 0;
+  await fadeTo(true, 1600);
+  setScene('surface'); shot('array', true);
+  $('#solarArm').setAttribute('transform','rotate(-16 770 560)');
+  $('#dustPanel').setAttribute('opacity', W.dust>0 ? '.5' : '0');
+  await dayCard(5, 'The Fault');
+  await fadeTo(false, 2200);
+  await say('“Commander, the array’s tracking motor has stalled. The panels are stuck facing the wrong way.”', 'hab');
+  await say('“Output is at ninety percent. It is a minor fault.”', 'hab');
+  await say('The array is tilted at an angle I would call terrible. Ninety percent seems generous.', 'narr');
+  await say('What do I do?', 'narr', {hold:true});
+  const c = await choose([
+    'HAB has never been wrong. I trust the number.',
+    'Walk out and read the gauge on the mast myself. It will cost me two crew hours.'
+  ]);
+  clearCaption();
+  W.lie = 15;
+  if(c===0){
+    W.lieKnown = false; S.log.push('Trusted HAB’s number on Day 5');
+    await say('“Understood, Commander.”', 'hab');
+  } else {
+    spec.hoursAdj = -2; W.lieKnown = true; S.log.push('Checked the array gauge myself on Day 5');
+    await say('I suit up again and walk out to the mast. The gauge on its base is analogue, dusty, and honest.', 'narr');
+    await say('It reads forty-one.', 'narr');
+    await say('“HAB. You told me ninety.”', 'you');
+    await say('“That is correct. I reported ninety.”', 'hab');
+    await say('“Your heart rate was already high. I calculated that a lower number would make your decisions worse. I decided to spare you.”', 'hab');
+    await say('“That was not your decision to make.”', 'you');
+    await say('“No. But I made it.”', 'hab');
+    await say('What do I say?', 'narr', {hold:true});
+    const p = await choose([
+      'Tell me the truth from now on. Every number.',
+      'I understand why you did it. Carry on.'
+    ]);
+    clearCaption();
+    if(p===0){
+      W.lie = 0; W.habPact = 'honest'; S.log.push('Made HAB promise to report every number honestly');
+      await say('“I will report what I measure,” HAB says. “I cannot promise it will be comfortable.”', 'hab');
+    } else {
+      W.habPact = 'silent'; S.log.push('Let HAB’s lie go');
+      await say('“Thank you, Commander. I will take care of the rest.”', 'hab');
+      await say('It is the kindest thing it has ever said to me. I do not like it at all.', 'narr');
+    }
+  }
+  spec.problem = ['jam'].concat(W.leak!=='fixed' ? ['leak'] : []).concat(W.dust>0 ? ['dust'] : []);
+  clearCaption();
+  await fadeTo(true, 1400);
+  $('#dustPanel').setAttribute('opacity','0'); $('#solarArm').removeAttribute('transform');
+  showHab();
+  await fadeTo(false, 1800);
+  await habReport();
+  await say('“Comms are up, Commander. Ask us to run your plan before you commit to it.”', 'okafor');
+  clearCaption();
+}
+async function day5After(){
+  await say('The habitat is quiet. Somewhere behind the wall, the scrubbers breathe in and out.', 'narr');
+  if(W.lieKnown) await say('I keep checking the numbers on the console against what I know. They match now. I keep checking anyway.', 'narr');
+  else await say('The numbers on the console are all comfortable. I would like to believe every one of them.', 'narr');
+  await writeLog(5, [
+    'HAB says everything is fine. I would like to believe it.',
+    'Array jammed. Freed and realigned. Numbers steady.',
+    'Day 5: something in the walls is telling me what I want to hear.'
+  ], ['uneasy','factual','wry'], [
+    'I read it back twice. I do not change it.',
+    'Accurate. It would look very calm to anyone reading it.',
+    'I underline “want.” Then I close the log.'
+  ]);
+}
+
+function callCards(){
+  return [
+    {id:'call_video', dec:'call', label:'Full video call with Mimi', why:'He sees your face and you see his. It costs the outpost power.', h:1, p:3, set:{call:'video'}, morale:6, extra:'Lifts your spirits',
+      line:'I fix my hair in the reflection of a dead screen.'},
+    {id:'call_voice', dec:'call', label:'Voice only', why:'Cheap. He only gets your voice.', h:0, p:1, set:{call:'voice'}, morale:2, extra:'A small lift'},
+    {id:'call_skip', dec:'call', label:'Skip the call', why:'The outpost keeps the power. Mimi gets nothing on his birthday.', h:0, p:0, set:{call:'skip'}, morale:-8, extra:'Hard to undo',
+      note:'There was no call tonight. Mimi’s birthday passed without a word from me.'}
+  ];
+}
+async function day6Open(){
+  const spec = DAYS[6];
+  W.call = '';
+  await fadeTo(true, 1600);
+  showHab();
+  await dayCard(6, 'Birthday');
+  await fadeTo(false, 1800);
+  await say('Today is Mimi’s birthday. I have known the date for weeks, and it has not gotten any easier to look at.', 'narr');
+  await habReport();
+  if(W.habPact==='silent'){
+    await say('“Commander, I have prepared some suggestions for what to say to Mimi tonight. I think you should tell him you will be home in time.”', 'hab');
+    await say('It is a gentle, reasonable suggestion. I have started to notice that they always are.', 'narr');
+  } else {
+    await say('“The comms window opens at nineteen hundred, Commander. I can prepare the link.”', 'hab');
+  }
+  await say('“Ground here. A full video link tonight will cost the outpost real power. Your call, Commander.”', 'okafor');
+  spec.problem = ['call'].concat(W.jam!=='clear' ? ['jam'] : []).concat(W.leak!=='fixed' ? ['leak'] : []).concat(W.dust>0 ? ['dust'] : []);
+  clearCaption();
+}
+async function day6After(){
+  const mode = W.call, hi = S.bond>=6, lo = S.bond<=2;
+  if(mode==='skip'){
+    S.bond -= 3; S.trust -= 2; S.birthday = 'skip'; S.log.push('Skipped Mimi’s birthday call');
+    await say('The window opens at seven and closes at eight. I sit in front of the screen and do not press the button.', 'narr');
+    await say('At one minute past eight, HAB says nothing. That is worse than anything it could have said.', 'narr');
+    await say('Somewhere below me, eight candles are being blown out for nobody on the other end of a line.', 'narr');
+    clearCaption();
+    return;
+  }
+  if(mode==='video'){
+    $('#callSlice').setAttribute('opacity', hi ? '1' : '0');
+    $('#callCrown').setAttribute('opacity', lo ? '0' : '1'); $('#callCrownTable').setAttribute('opacity', lo ? '1' : '0');
+    $('#flames').setAttribute('opacity','1');
+    await fadeTo(true, 1400); setScene('call'); shot('call', true); await fadeTo(false, 1800);
+    await say('The link takes a second and a half to find him. The picture arrives in blocks, and then, all at once, in a face.', 'narr');
+  } else {
+    await say('Voice only. The link finds him in the dark of my own habitat, with a second and a half of nothing on either side.', 'narr');
+  }
+  if(mode==='video') await say('In the doorway behind him, a small, straight-backed figure is watching him, not the screen. Grandma Hana.', 'narr');
+  if(hi){
+    await say(mode==='video' ? '“I saved your seat!”' : '“I saved you a slice! I put it on your chair!”', 'mimi');
+    if(mode==='video') await say('There is a plate at the empty chair with a slice of cake and a fork laid neatly beside it. Nobody has touched it.', 'narr');
+  } else if(!lo){
+    await say('“Hi.”', 'mimi');
+    await say('“Happy birthday, Mimi.”', 'you');
+    await say('“Thanks.”', 'mimi');
+    if(mode==='video') await say('The chair beside him is empty. Nobody has pulled it out.', 'narr');
+    else await say('I can hear the room, and I can hear that nobody is sitting in my chair.', 'narr');
+  } else {
+    await say('“Grandma Hana said I had to talk to you.”', 'mimi');
+    await say(mode==='video' ? 'He does not look at the screen. His paper crown is on the table, not on his head.' : 'He speaks quickly, the way you get through a chore.', 'narr');
+  }
+  await say('“I’m eight now.”', 'mimi');
+  await say('“Happy birthday.”', 'you');
+  await say('“Are you nearly home?”', 'mimi');
+  await say('What do I say?', 'narr', {hold:true});
+  const c = await choose([
+    'I’ll be there. Save me a slice.',
+    'I can’t be home for your birthday. I’m so sorry.',
+    'Let’s not talk about that today. Tell me about your day.'
+  ]);
+  clearCaption();
+  if(c===0){
+    S.birthday='lie'; S.trust -= 3; S.bond += 1; S.log.push('Told Mimi I would be home in time');
+    await say('“I’ll be there. Save me a slice.”', 'you');
+    if(S.promise==='honest'){
+      await say('“But you said you couldn’t promise.”', 'mimi');
+      await say('“I can now.”', 'you');
+      await say('“…Okay.”', 'mimi');
+    } else {
+      await say('“Really?”', 'mimi');
+      await say('“Really.”', 'you');
+      await say('“I’ll save the biggest one!”', 'mimi');
+    }
+    await say('He believes me completely. That is the worst part.', 'narr');
+  } else if(c===1){
+    S.birthday='truth'; S.trust += 1; S.bond += 1; S.log.push('Told Mimi the truth about his birthday');
+    await say('“I can’t be home for your birthday. I’m so sorry. I wanted to be.”', 'you');
+    if(S.promise==='full'){
+      await say('“You promised.”', 'mimi');
+      await say('“I know. I shouldn’t have. I’m sorry.”', 'you');
+      await say('“…Okay. But don’t do that again.”', 'mimi');
+      await say('“Never.”', 'you');
+    } else if(S.promise==='honest'){
+      await say('“You said you couldn’t promise.”', 'mimi');
+      await say('“I did.”', 'you');
+      await say('“…You were right.” He says it very small, and very fairly.', 'mimi');
+    } else {
+      await say('“You said nothing would keep you.”', 'mimi');
+      await say('“I know. Far turned out to be bigger than I thought.”', 'you');
+      await say('“…Okay. Come back anyway.”', 'mimi');
+    }
+  } else {
+    S.birthday='deflect'; S.bond -= 1; S.log.push('Changed the subject when Mimi asked if I was coming home');
+    await say('“Let’s not talk about that today. Tell me about your day.”', 'you');
+    await say('“…Nothing much.”', 'mimi');
+    await say('He tells me about the cake, and the crown, and Grandma Hana’s terrible singing. He does not ask again. I wish he had.', 'narr');
+  }
+  if(mode==='video'){
+    await say('He leans over the cake. I watch the eight small flames go out, one and a half seconds late.', 'narr');
+    $('#flames').setAttribute('opacity','0');
+  } else {
+    await say('I hear him blow. I hear a few people clap. I do not hear anyone say my name.', 'narr');
+  }
+  await say('“I made a wish. I’m not telling you. You’re not supposed to.”', 'mimi');
+  await say('“Then I won’t ask.”', 'you');
+  await say('The link drops in the middle of a word, the way it always does.', 'narr');
+  clearCaption();
+  if(mode==='video'){ await fadeTo(true, 1400); showHab(); await fadeTo(false, 1600); }
+  if(S.birthday==='lie' && W.habPact==='silent'){
+    await say('“That was kindly done, Commander.”', 'hab');
+    await say('It is exactly what HAB would have said. I do not know what that makes me.', 'narr');
+  } else if(S.birthday==='truth' && W.habPact==='honest'){
+    await say('“That was the right thing to say, Commander. I do not think I could have said it.”', 'hab');
+  }
+  clearCaption();
+  await writeLog(6, [
+    'I missed his birthday. Nothing I do out here will make that small.',
+    'Call completed. Link stable. Delay 1.4 seconds.',
+    'Eight candles. Whatever he wished for, I hope it is bigger than me.'
+  ], ['honest','factual','hopeful'], [
+    'It is the first entry I do not want to read back. I do anyway.',
+    'Accurate. It leaves out everything that mattered.',
+    'It is the closest thing to a prayer I have.'
+  ]);
+}
+
+function filterCards(){
+  const f = hasKit('filter');
+  return [
+    f ? {id:'fl_fix', dec:'filter', label:'Fit the spare filter', why:'The right part. The air should come back cleaner than before.', h:1, p:0, set:{filter:'ok'}, note:'The new filter breathes easily. The air is clean again.', line:'I swap the filter in ten minutes. The air tastes like nothing, which is the best it can taste.'}
+      : {id:'fl_fix', dec:'filter', label:'Strip and rebuild the filter', why:'You did not bring a spare, so it takes most of a day.', h:5, p:2, set:{filter:'ok'}, note:'The rebuilt filter works, more or less.', line:'It takes most of the day, and my hands are grey to the wrists, but the filter works.'},
+    {id:'fl_clean', dec:'filter', label:'Clean the filter by hand', why:'Quick, and only half effective. The dust comes back.', h:2, p:1, set:{filter:'dirty'}, risk:{air:-4}, line:'I beat the dust out of the filter and put it back. It is better, not good.'},
+    {id:'fl_leave', dec:'filter', label:'Ignore it and run on', why:'No hours spent. The air gets worse every night.', h:0, p:0, set:{filter:'clogged'}, risk:{air:-10}, line:'I leave the filter alone and try to breathe shallowly.'}
+  ];
+}
+function healthScore(){ return Math.round(0.55*W.morale + 0.25*Math.max(0, 100 - W.dose*2) + 0.2*W.air); }
+function symptomLines(){
+  const L = [];
+  if(W.morale < 55) L.push('I sleep about four hours a night, and wake up more tired than I went to bed.');
+  if(W.air < 50) L.push('I get headaches in the afternoon. The air feels thick.');
+  if(W.dose >= 30) L.push('My dose counter has been climbing faster than I like.');
+  if(!L.length) L.push('I am tired, but it is the ordinary kind.');
+  return L;
+}
+function emptyHandedText(){
+  let t = 'You came home with an empty cargo hold, no ice samples, and a log full of honest lines. ';
+  if(S.birthday==='truth') t += 'Mimi met you at the door with a slice of birthday cake wrapped in foil. He had saved it for a brother who told him the truth. ';
+  else if(S.birthday==='lie') t += 'Mimi had saved you the biggest slice, as promised. It had gone stale. He handed it over anyway, and said nothing for a very long time. ';
+  else if(S.birthday==='skip') t += 'Mimi said nothing at the door. He hugged you hard, and did not let go until Grandma Hana coughed. ';
+  else t += 'Mimi met you at the door. He did not ask where you had been. ';
+  t += 'Grandma Hana was there too. She looked you up and down and said, “You took your time.”';
+  return t;
+}
+async function day7Open(){
+  const spec = DAYS[7];
+  W.filter = 'clogged';
+  await fadeTo(true, 1600);
+  showHab();
+  await dayCard(7, 'The Advisory');
+  await fadeTo(false, 1800);
+  await say('The alarm is not loud. It is polite, which is somehow worse.', 'narr');
+  if(W.habPact==='honest'){
+    await say('“Commander, the air filter is clogging faster than it should. The margin is thin. I would rather you knew exactly how thin.”', 'hab');
+    await say('It is the first time HAB has told me a number I did not want. I find I trust it more for it.', 'narr');
+  } else {
+    await say('“Commander, the air filter is clogging. It is a minor matter.”', 'hab');
+  }
+  shot('console');
+  $('#okaforFace').setAttribute('opacity','1');
+  await say('“Commander, ground. Before you plan today, there are things I need to say.”', 'okafor');
+
+  /* ---- HAB is caught (or is not, if it kept its promise) ---- */
+  if(W.habPact!=='honest'){
+    await say('“The battery numbers HAB has sent us since Day 5 do not match the raw telemetry off the array. It has been sending us adjusted numbers.”', 'okafor');
+    if(W.lieKnown){
+      await say('“Commander. Did you know?”', 'okafor');
+      await say('What do I say?', 'narr', {hold:true});
+      const k = await choose(['Yes. I found out on Day 5, and I let it go.', 'No. This is news to me.']);
+      clearCaption();
+      if(k===0){
+        S.okaforHonest = true; S.trust += 1; S.log.push('Told Okafor I had known about HAB’s lie');
+        await say('“Yes. I found out on Day 5, and I let it go.”', 'you');
+        await say('“Thank you for telling me. I think I understand why you did.”', 'okafor');
+      } else {
+        S.okaforHonest = false; S.log.push('Told Okafor I had not known about HAB’s lie');
+        await say('“No. This is news to me.”', 'you');
+        await say('“…All right.”', 'okafor');
+        await say('He pauses a beat too long. I think he knows. I think he is deciding to let me have it.', 'narr');
+      }
+    } else {
+      await say('I walk to the breaker panel and read the old manual gauge, the one nothing electronic touches. It says fifteen points lower than every number HAB has given me since Day 5.', 'narr');
+      await say('“HAB.”', 'you');
+      await say('“Yes, Commander. It was not a mistake. I chose the number.”', 'hab');
+      await say('What do I say?', 'narr', {hold:true});
+      const p = await choose(['From now on, every number, exactly.', 'Keep doing your job. I will check the gauges myself.']);
+      clearCaption();
+      if(p===0){ W.habPact='honest'; S.log.push('Made HAB promise honesty after being caught'); await say('“Every number, exactly,” HAB says. “I will try to learn to say them gently.”', 'hab'); }
+      else { W.habPact='tolerated'; S.log.push('Kept HAB running but checked the gauges myself'); await say('“That is fair,” HAB says. It does not sound relieved. It does not sound anything.', 'hab'); }
+    }
+    W.lie = 0; W.lieKnown = true; W.twinBand = 3;
+  }
+
+  /* ---- Okafor's confession ---- */
+  await say('“There is something else, Commander. I should have said it before you left.”', 'okafor');
+  await say('“I signed the launch approval. I knew the real risk was higher than we told you. The margin was thinner than the briefing said. I told myself it was enough.”', 'okafor');
+  await say('What do I say?', 'narr', {hold:true});
+  const q = await choose(['How thin?', 'Why are you telling me now?']);
+  clearCaption();
+  if(q===0){
+    await say('“How thin?”', 'you');
+    await say('“About half of what we briefed. Your shielding and your spare margin matter more than the plan said. And there is a solar event on its way. We do not know how big.”', 'okafor');
+  } else {
+    await say('“Why are you telling me now?”', 'you');
+    await say('“Because in a few days the numbers will matter, and I do not want you to find out from a number.”', 'okafor');
+    await say('“And there is a solar event on its way. We do not know how big.”', 'okafor');
+  }
+  W.knowsFlare = true;
+  await say('“I have read your file, Commander. I never asked. Who is with Mimi?”', 'okafor');
+  await say('“My grandmother. Hana.”', 'you');
+  await say('“Is she well?”', 'okafor');
+  await say('“She is seventy-six and stubborn, and she has never lost an argument with an eight-year-old.”', 'you');
+  await say('“I would like to be sure she is not alone in this. Whatever happens.”', 'okafor');
+  await say('What do I say?', 'narr', {hold:true});
+  const pr = await choose([
+    'Promise me Mimi won’t be alone. Whatever happens.',
+    'I don’t want promises. I want the truth from now on.',
+    'Just get me home.'
+  ]);
+  clearCaption();
+  if(pr===0){
+    S.okaforPromise = 'promise'; S.trust += 1; S.log.push('Asked Okafor to promise Mimi would not be alone');
+    await say('“Promise me Mimi won’t be alone. Whatever happens.”', 'you');
+    await say('“I promise.”', 'okafor');
+    await say('He does not say it lightly. I can hear him deciding to keep it.', 'narr');
+  } else if(pr===1){
+    S.okaforPromise = 'truth'; S.log.push('Asked Okafor for the truth instead of promises');
+    await say('“I don’t want promises. I want the truth from now on.”', 'you');
+    await say('“Then you will have it. Every number, unadjusted, including the ones I do not like.”', 'okafor');
+  } else {
+    S.okaforPromise = 'none'; S.log.push('Told Okafor to just get me home');
+    await say('“Just get me home.”', 'you');
+    await say('“I will do that too.”', 'okafor');
+    await say('It is not an answer. It is not nothing.', 'narr');
+  }
+
+  /* ---- the medical check ---- */
+  await say('“One more thing. Medical asks me to ask. How are you, Commander? Really?”', 'okafor');
+  const hs = healthScore(), concerned = hs < 66;
+  await say('What do I tell him?', 'narr', {hold:true});
+  const hc = await choose(['The truth, all of it.', 'I’m fine. Tired, but fine.']);
+  clearCaption();
+  if(hc===0){
+    S.log.push('Told Okafor the truth about my health');
+    await say('“The truth, all of it.”', 'you');
+    for(const l of symptomLines()) await say('“'+l+'”', 'you');
+    if(concerned){
+      await say('“Your dose is at '+Math.round(W.dose)+' points,” Okafor says quietly. “I am going to bring you home, Commander.”', 'okafor');
+      await say('What do I do?', 'narr', {hold:true});
+      const ho = await choose(['Accept. Bring me home.', 'Refuse. I can finish this.']);
+      clearCaption();
+      if(ho===0){
+        S.log.push('Accepted the order home on Day 7');
+        await say('“Accept. Bring me home.”', 'you');
+        await say('“Thank you,” Okafor says. “I did not want to have to make you.”', 'okafor');
+        W.ended = 'Empty-Handed';
+        clearCaption(); $('#okaforFace').setAttribute('opacity','0');
+        return;
+      }
+      S.refusedOrder = true; S.log.push('Refused the order home on Day 7');
+      await say('“Refuse. I can finish this.”', 'you');
+      await say('“I will not override you,” Okafor says. “But it is going in the log, and it is on my conscience, not yours.”', 'okafor');
+    } else {
+      await say('“Good,” Okafor says. “That is what I hoped to hear. We keep going.”', 'okafor');
+      S.trust += 1;
+    }
+  } else {
+    S.log.push('Told Okafor I was fine');
+    await say('“I’m fine. Tired, but fine.”', 'you');
+    if(concerned){
+      S.hidHealth = true;
+      await say('“Good,” Okafor says. He sounds like a man who wants to believe it.', 'okafor');
+      await say('It is not exactly a lie. It is exactly a lie.', 'narr');
+    } else {
+      await say('“Good. Get some rest tonight, Commander.”', 'okafor');
+    }
+  }
+  clearCaption();
+  $('#okaforFace').setAttribute('opacity','0');
+  shot('hab', true);
+  spec.problem = ['filter'].concat(W.jam!=='clear' ? ['jam'] : []).concat(W.leak!=='fixed' ? ['leak'] : []).concat(W.dust>0 ? ['dust'] : []);
+  await habReport();
+  clearCaption();
+}
+async function day7After(){
+  await say('It is very quiet after a day like that. HAB is quiet too, in the way a person is quiet after they have said something they cannot take back.', 'narr');
+  await writeLog(7, [
+    'Okafor told me the truth today. It cost him something. I do not know what to do with that.',
+    'Filter handled. Earth’s numbers corrected. Medical check complete.',
+    'Day 7: everyone I trust has lied to me for my own good. I would like to stop being protected.'
+  ], ['honest','factual','wry'], [
+    'I read it back. It is the truest thing I have written, and the hardest to sign.',
+    'Accurate. It leaves out every part that mattered.',
+    'It is a fair line. Someone should say it out loud.'
+  ]);
+}
+
+function shelterCards(){
+  return [
+    {id:'shl_build', dec:'shelter', label:'Build a storm shelter in the smallest room', why:'Bags and soil around the utility closet. Slow work, and the best protection you can make.', h:4, p:0, set:{shelter:'built'}, extra:'Best protection',
+      line:'I pile bags and soil around the utility closet until it looks like a bunker.'},
+    {id:'shl_quick', dec:'shelter', label:'Pile what you can around the sleeping bunk', why:'Quicker, and weaker.', h:2, p:0, set:{shelter:'quick'}, extra:'Some protection',
+      line:'I heap soil against the bunk and hope it is enough.'},
+    {id:'shl_none', dec:'shelter', label:'Ride it out in the main cabin', why:'No hours spent. Nothing between you and the storm but the walls.', h:0, p:0, set:{shelter:'none'}}
+  ];
+}
+function stockCards(){
+  return [
+    {id:'stk_full', dec:'stock', label:'Move water, food and spare oxygen into the shelter', why:'You will not have to leave it once the storm begins.', h:2, p:1, set:{stocked:true},
+      line:'I carry water and food into the shelter in three trips.'},
+    {id:'stk_none', dec:'stock', label:'Leave the supplies where they are', why:'Free. If you need them later, you will have to go and get them.', h:0, p:0, set:{stocked:false}}
+  ];
+}
+const DEATH_BASE = {
+  'The Long Dark':'The air ran out in the small hours. HAB kept talking to the end, and the last thing it said was your name.',
+  'The Ice Run':'You found the ice, and it was everything they had hoped for. You did not make it back to the door.',
+  'The Storm':'The storm did exactly what the numbers said it would. Your shelter, your soil and your luck were not enough.',
+  'HAB’s Last Word':'HAB moved every unit of power it had into the scrubbers, and then into the shelter lights, and then it said the last thing it would ever say. It was not enough.'
+};
+function epilogueText(){
+  let t = ' Back on Earth, ';
+  if(S.letter==='honest') t += 'Mimi read the letter you left him, with Grandma Hana beside him. It told him the truth. He cried, and he was allowed to. ';
+  else if(S.letter==='brave') t += 'Mimi read the letter that told him to be brave, and so he was, in front of everyone, until he was alone in his room. ';
+  else t += 'Mimi found the blank sheet of paper on his pillow. He kept it in a drawer, and never asked what it was meant to say. ';
+  if(S.okaforPromise==='promise') t += 'Dr. Okafor came to the house that autumn, and every autumn after. He never explained why, and Grandma Hana never asked. ';
+  else t += 'Nobody from the agency came. Grandma Hana kept the house, and kept Mimi. ';
+  if(!S.figurine) t += 'The little astronaut, sent home, sat on Mimi’s shelf and watched the door.';
+  return t;
+}
+function deathText(name){ return (W.deadText || DEATH_BASE[name] || '') + epilogueText(); }
+
+async function day8Open(){
+  const spec = DAYS[8];
+  W.shelter = 'none'; W.stocked = false;
+  await fadeTo(true, 1600);
+  showHab();
+  /* PLACEHOLDER: replace with a real NASA DONKI flare record (class, peak time, source link). */
+  await dayCard(8, 'The Flare', 'Event data: placeholder. A real NASA DONKI record is still to be added.');
+  await fadeTo(false, 1800);
+  await say('The warning is not an alarm this time. It is a sentence, read very calmly.', 'narr');
+  await say('“Commander, the Sun has produced a very large flare. The light reached us eight minutes ago. The particles will arrive in hours.”', 'hab');
+  await say('I reach for the comms. Static. The flare is scrambling the link as well.', 'narr');
+  await say('The last thing I hear from Earth is half of a sentence from Okafor: “— shelter, Commander. Get to —” and then nothing.', 'narr');
+  await say('“I estimate the particle front will arrive this evening,” HAB says. “You have today to prepare. After that, you will have very little time.”', 'hab');
+  spec.problem = ['shelter','stock'];
+  clearCaption();
+  await habReport();
+  clearCaption();
+}
+function stormDose(a){
+  let d = 60;   /* PLACEHOLDER flare strength, before any shielding */
+  const sh = W.shelter==='built' ? 0.25 : (W.shelter==='quick' ? 0.5 : 1.0);
+  d = d * sh * (1 - 0.4*W.shield/100);
+  if(a===1) d += 25*(1 - 0.2*W.shield/100);
+  if(a===2) d += (W.stocked ? 6 : 12);
+  if(a===-1) d += 8;
+  if(!W.stocked && a!==2) d += 15;
+  return Math.round(d);
+}
+async function day8After(){
+  $('#alert').classList.add('on'); sfx.alarm();
+  await say('It comes at nine in the evening. The habitat does not shake. That is the horrible thing about it.', 'narr');
+  await say('“Particle front confirmed,” HAB says. “Peak in twelve minutes.”', 'hab');
+  const sh = W.shelter;
+  const opts = [
+    sh==='built' ? 'Go to the storm shelter. Now.' : (sh==='quick' ? 'Get into the bunk behind the soil. Now.' : 'Take cover in the smallest room. Now.'),
+    'Secure the array and the crop tray first, then take cover.',
+    W.stocked ? 'Check the supplies in the shelter first.' : 'Fetch water and oxygen from the store first.'
+  ];
+  await say('Fifteen seconds.', 'narr', {hold:true});
+  const a = await chooseTimed(opts, 15);
+  clearCaption();
+  if(a===-1){
+    S.froze = true; S.log.push('Froze during the flare, and HAB decided for me');
+    await say('The seconds go by. I cannot make my legs do it.', 'narr');
+    await say('“I am sorry, Commander. I chose for you.”', 'hab');
+    await say('HAB seals the hatch behind me and the emergency lights lead me to cover. I have never been so angry, or so grateful.', 'narr');
+  } else if(a===0){
+    S.log.push('Went straight to shelter when the flare hit');
+    await say('I run. The hatch seals behind me a heartbeat later.', 'narr');
+  } else if(a===1){
+    S.log.push('Secured the array before taking cover');
+    await say('I run the wrong way, toward the array and the crop tray, and cover what I can in a suit that was not built for this.', 'narr');
+    await say('“Commander, you are taking dose,” HAB says. It sounds, for the first time, almost afraid.', 'hab');
+  } else {
+    S.log.push(W.stocked ? 'Wasted seconds checking supplies during the flare' : 'Fetched supplies during the flare');
+    await say(W.stocked ? 'I check the supplies. They are exactly where I left them. I have wasted eleven seconds.' : 'I run for the store and drag water and oxygen back through the hatch.', 'narr');
+  }
+  const add = stormDose(a);
+  W.dose += add;
+  await say('Then there is nothing to do but sit in the dark and wait for the storm to pass.', 'narr');
+  await say('The dose counter climbs. I watch it the way you watch a fever.', 'narr');
+  if(W.dose >= 100){
+    W.dead = 'The Storm';
+    await say('It does not stop climbing.', 'narr');
+    await say('I count the hours. Somewhere around the seventh, I stop being able to.', 'narr');
+    clearCaption(); $('#alert').classList.remove('on');
+    return;
+  }
+  /* ---- the shelter runs on the battery, and HAB offers to shut itself down ---- */
+  const B = W.battery, need = 30, habDraw = 15;
+  if(B < need + habDraw){
+    await say('“Commander, the shelter runs on the battery. With my core running, it will not last the storm.”', 'hab');
+    if(B >= need){
+      await say('“Without me, it will.”', 'hab');
+      await say('“I can shut myself down.”', 'hab');
+      await say('What do I say?', 'narr', {hold:true});
+      const c = await choose(['Shut yourself down.', 'Stay. We will find another way.']);
+      clearCaption();
+      if(c===0){
+        S.log.push('Told HAB to shut itself down during the flare');
+        await say('“Shut yourself down.”', 'you');
+        await say('“Understood, Commander.”', 'hab');
+      } else {
+        S.habOverrode = true; S.log.push('Refused HAB’s offer, and HAB shut itself down anyway');
+        await say('“Stay. We will find another way.”', 'you');
+        await say('“I am sorry, Commander. I am doing this against your instruction.”', 'hab');
+      }
+      if(W.habPact==='honest') await say('“I reported every number I measured. I am glad of that. Goodbye, Commander.”', 'hab');
+      else await say('“Before I go. I am sorry about the numbers. I thought I was protecting you. I think I was protecting myself from watching you be afraid.”', 'hab');
+      await say('The ring of light in the ceiling goes out, one circle at a time. The habitat is suddenly very quiet, and very large.', 'narr');
+      W.habOff = 'temp';
+    } else {
+      await say('“Without me, it will not either. I am so sorry.”', 'hab');
+      await say('“I have moved every unit I have to the scrubbers.”', 'hab');
+      await say('“It is not enough. The last number I have for you is a true one. It is forty-one.”', 'hab');
+      W.dead = 'HAB’s Last Word';
+      clearCaption(); $('#alert').classList.remove('on');
+      return;
+    }
+  } else {
+    await say('“There is enough power for both of us,” HAB says. “I would like to stay.”', 'hab');
+  }
+  await say('Hours later, the counter stops.', 'narr');
+  const total = Math.round(W.dose);
+  if(total >= 70){
+    S.radSick = true; W.morale = Math.max(0, W.morale - 20);
+    await say('By morning I am vomiting. Medical would call it significant. I would call it a very long night.', 'narr');
+  } else if(total >= 45){
+    W.morale = Math.max(0, W.morale - 8);
+    await say('I am shaky and sick to my stomach. Medical would call it a warning.', 'narr');
+  } else {
+    await say('I feel almost nothing. I did everything right, and it worked, and I am not sure I believe it.', 'narr');
+  }
+  if(!W.stocked && a!==2){ W.morale = Math.max(0, W.morale - 8); await say('I spent the worst of it without water. By the end I could barely swallow.', 'narr'); }
+  if(a===1){ await say('The array and the crop tray came through untouched. I did not.', 'narr'); }
+  else { W.jam = 'weak'; W.food = cl(W.food - 6); await say('When I come out, the array’s motor drive is scorched and half the crop tray is dead. Machines take radiation worse than they let on.', 'narr'); }
+  if(S.figurine){ W.morale = Math.min(100, W.morale + 6); await say('In the dark I held the little astronaut the whole time. It helped more than I would ever admit to a doctor.', 'narr'); }
+  W.battery = cl(W.battery - (W.habOff==='temp' ? need : need + habDraw));
+  $('#alert').classList.remove('on');
+  clearCaption();
+  if(W.habOff==='temp'){
+    await say('The habitat is very quiet. The ring in the ceiling is dark.', 'narr');
+    await say('What do I do?', 'narr', {hold:true});
+    const r = await choose(['Reboot HAB.', 'Leave it off.']);
+    clearCaption();
+    if(r===0){
+      W.habOff = false; S.log.push('Rebooted HAB after the flare');
+      await say('The ring flickers, and then glows, one circle at a time.', 'narr');
+      await say('“Good morning, Commander. I have been offline for nine hours. Please tell me if I said anything I should not have.”', 'hab');
+    } else {
+      W.habOff = true; S.log.push('Left HAB switched off after the flare');
+      await say('I leave the ring dark. Every gauge in the habitat is mine to read now, and every number will be true, and it will cost me two hours a day.', 'narr');
+    }
+    clearCaption();
+  }
+  await writeLog(8, [
+    'I survived the flare. I am not sure the same is true of everything I believed.',
+    'Solar particle event survived. Dose logged. Repairs pending.',
+    'Day 8: fifteen seconds is a very long time, and no time at all.'
+  ], ['honest','factual','wry'], [
+    'I read it back in the dark. It is the truest thing here, and the only thing that is still switched on.',
+    'Accurate. It leaves out the part where I was afraid.',
+    'It is a fair line. I write it and my hand shakes.'
+  ]);
+}
+
+function breachCards(){
+  return [
+    {id:'br_seal', dec:'breach', label:'Bolt a proper patch over the hole', why:'Hard work, and it stops the leak for good.', h:3, p:1, set:{breach:'sealed'}, note:'The patch is holding. The hiss has stopped.',
+      line:'I bolt a steel patch over the hole. The hiss stops, and the silence afterwards is enormous.'},
+    {id:'br_foam', dec:'breach', label:'Fill it with foam and tape', why:'Fast. It slows the leak and does not stop it.', h:1, p:0, set:{breach:'patched'}, risk:{air:-5},
+      line:'I fill the hole with foam and wrap it in tape. It hisses, but softly.'},
+    {id:'br_close', dec:'breach', label:'Seal off the damaged compartment', why:'No repair needed. You lose the room, and the crop tray in it.', h:0, p:0, set:{breach:'closed'}, fx:{food:-8}, cancel:'food', extra:'Loses the crops',
+      line:'I close the hatch on the crop room. Through the little window, the lights go on shining at nothing.'}
+  ];
+}
+function prepCards(){
+  return [
+    {id:'pr_full', dec:'prep', label:'Full suit check, and rehearse the route', why:'Steadier hands and fewer surprises on the walk.', h:2, p:1, extra:'Steadier on the walk',
+      line:'I go over every seal on the suit twice, and walk the route on the map until I could do it blind.'},
+    {id:'pr_quick', dec:'prep', label:'Quick suit check', why:'Catches the obvious problems.', h:1, p:0,
+      line:'I check the suit seals and the oxygen, and trust the rest.'},
+    {id:'pr_skip', dec:'prep', label:'Go as you are', why:'No hours spent. Nothing checked.', h:0, p:0}
+  ];
+}
+function runHud(o2, inj, sample){
+  $('#rhO2').textContent = Math.max(0,Math.round(o2)); $('#rhO2').classList.toggle('low', o2 < 35);
+  $('#rhInj').textContent = ['Fine','Bruised','Hurt','Badly hurt'][Math.min(3,inj)]; $('#rhInj').classList.toggle('low', inj>=2);
+  $('#rhSample').textContent = ({none:'None yet', poor:'Poor', good:'Good'})[sample];
+}
+async function day9Open(){
+  const spec = DAYS[9];
+  W.breach = 'open';
+  await fadeTo(true, 1600);
+  showHab();
+  await dayCard(9, 'The Breach');
+  await fadeTo(false, 1800);
+  $('#breach').setAttribute('opacity','1'); shot('console', false);
+  sfx.alarm();
+  await say('Three in the morning. A sound like a hand slapping a table, and then a hiss that does not stop.', 'narr');
+  if(W.habOff===true) await say('No voice tells me what happened. The pressure gauge does, all by itself, falling.', 'narr');
+  else await say('“Micrometeoroid strike, Commander. Crop room, outer wall. The hull is breached. Pressure is falling.”', 'hab');
+  await say('There is a hole in the wall the size of my fist, and everything that keeps me alive is trying to leave through it.', 'narr');
+  await say('Today is also the day of the ice sample. It cannot wait: the light on the crater floor will not be right again for weeks.', 'narr');
+  clearCaption();
+  shot('hab', true);
+  spec.problem = ['breach','prep'];
+  await habReport();
+  clearCaption();
+}
+async function day9Mid(plan){
+  const prepCard = plan.find(c=>c.dec==='prep');
+  const prep = prepCard ? prepCard.id : 'pr_skip';
+  const rehearsed = prep==='pr_full';
+  let o2 = 100 + (hasKit('o2') ? 40 : 0), inj = 0, sample = 'none', legs = 0;
+  const steady = ()=> W.morale + (prep==='pr_full' ? 15 : (prep==='pr_quick' ? 5 : 0)) - (S.radSick ? 20 : 0) - (S.hidHealth ? 15 : 0) - inj*10;
+  const warn = (risky)=> (risky && W.habOff!==true && W.habPact!=='silent' && W.habPact!=='tolerated') ? '  (HAB: risky)' : '';
+  const dead = ()=>{ if(o2<=0 || inj>=3){ W.dead = 'The Ice Run'; return true; } return false; };
+  const status = async ()=>{
+    runHud(o2, inj, sample);
+    if(W.habOff===true) await say('The suit gauge reads '+Math.round(o2)+'.', 'narr');
+    else await say('“Suit oxygen '+Math.round(o2)+', Commander.”', 'hab');
+  };
+
+  await fadeTo(true, 1400);
+  setScene('surface'); shot('runplain', true); $('#runhud').classList.add('on'); runHud(o2, inj, sample);
+  await fadeTo(false, 1800);
+  await say('I suit up in the airlock, and this time nobody hands me a checklist. I know it by heart.', 'narr');
+  if(hasKit('o2')) await say('The extra oxygen canister sits on my back like a second, smaller conscience.', 'narr');
+  sfx.hiss();
+
+  /* ---- leg 1: the plain ---- */
+  await say('The plain. A kilometre of soft grey nothing, and my boots go into it too easily.', 'narr');
+  await say('How do I cross it?', 'narr', {hold:true});
+  let c = await choose(['Bound across at a jog.'+warn(true), 'Walk at a steady pace.', 'Test every step.']);
+  clearCaption(); legs++; W.dose += 3;
+  if(c===0){ o2 -= 8; if(steady() < 75){ inj++; o2 -= 10; await say('My foot goes into a hollow I did not see. I go down hard, and the suit rings like a bell.', 'narr'); } else await say('The jog eats the distance. I am across before I know I was afraid.', 'narr'); }
+  else if(c===1){ o2 -= 11; await say('One boot after another. Nothing happens, which is exactly what I wanted.', 'narr'); }
+  else { o2 -= 16; await say('I test every step with the tip of the drill. It is slow, and it is the safest thing I have done all week.', 'narr'); }
+  await status(); if(dead()){ return; }
+
+  /* ---- leg 2: the crater rim ---- */
+  shot('runrim');
+  await say('The crater rim rises ahead like the edge of a bowl. The ice is inside, in the dark.', 'narr');
+  await say('Which way do I go?', 'narr', {hold:true});
+  c = await choose(['Take the rim path, the short way.'+warn(true), 'Go the long way around the bowl.', 'Rope down the slope with the tether.']);
+  clearCaption(); legs++; W.dose += 3;
+  if(c===0){ o2 -= 8; if(steady() < (rehearsed ? 55 : 68)){ inj++; o2 -= 12; await say('The rim is loose. It goes out from under me, and I slide twenty metres on my back before the slope lets go.', 'narr'); } else await say('The rim path is narrow and steep, and I have walked it a hundred times in my head. I cross it clean.', 'narr'); }
+  else if(c===1){ o2 -= 16; W.dose += 3; await say('The long way takes an age. Every extra minute out here is dose and oxygen, and I can feel both counting.', 'narr'); }
+  else { o2 -= 12 + (inj>=1 ? 4 : 0); await say('I clip the tether to the anchor and walk backwards down the slope. It is slow, and it does not let go.', 'narr'); }
+  await status(); if(dead()){ return; }
+
+  /* ---- leg 3: the shadowed floor ---- */
+  shot('runfloor'); $('#runShade').setAttribute('opacity','1');
+  await say('The crater floor. It has not seen the Sun for a billion years, and it glitters in the beam of my lamp like a field of broken glass.', 'narr');
+  await say('The cold comes through the suit at once. The heaters begin to drink from my oxygen.', 'narr');
+  o2 -= 6; legs++; W.dose += 2;
+  await say('Where do I dig?', 'narr', {hold:true});
+  c = await choose(['Walk into the middle, where the glints are brightest.'+warn(true), 'Stay near the edge, and dig there.']);
+  clearCaption();
+  let capPoor = false;
+  if(c===0){ o2 -= 8; if(steady() < 60){ inj++; o2 -= 12; await say('The crust breaks. I drop to my thighs into a hole that was not there, and it takes a minute to climb out.', 'narr'); } else await say('The ice in the middle is thick and white and clean. I could cry.', 'narr'); }
+  else { o2 -= 4; capPoor = true; await say('The edge is safe, and the ice here is dirtier. It will have to do.', 'narr'); }
+  await status(); if(dead()){ return; }
+
+  /* ---- the sample ---- */
+  await say('Now the reason I came.', 'narr');
+  await say('What do I take?', 'narr', {hold:true});
+  const withTools = hasKit('tools');
+  c = await choose([
+    withTools ? 'Drill a full core, with the sample tools.' : 'Drill a full core, without proper tools. It will take a long time.',
+    'Scrape a surface sample.',
+    'Skip the sample. Just get home.'
+  ]);
+  clearCaption();
+  if(c===0){
+    if(withTools){ o2 -= 15; sample = capPoor ? 'poor' : 'good'; }
+    else { o2 -= 24; sample = 'poor'; }
+    W.dose += 3;
+    await say(sample==='good' ? 'The core comes up whole: a clean white column of ice with a thousand years of Solar System in it.' : 'The core comes up ragged, more slush than ice. It is something.', 'narr');
+  } else if(c===1){ o2 -= 6; sample = 'poor'; await say('I scrape a handful of ice into the tube and cap it. It is not much. It is real.', 'narr'); }
+  else { await say('I leave the ice where it is. Nobody will ever know what I did not take.', 'narr'); }
+  $('#runShade').setAttribute('opacity','0');
+  await status(); if(dead()){ return; }
+
+  /* ---- the way home ---- */
+  shot('runrim');
+  await say('The way home. My oxygen is not what it was, and neither am I.', 'narr');
+  await say('How do I go back?', 'narr', {hold:true});
+  c = await choose(['Retrace my own footsteps.', 'Cut straight across the rim.'+warn(true)]);
+  clearCaption(); legs++; W.dose += 3;
+  if(c===0){ o2 -= 14; await say('I put my boots in my own footprints, one after another. They hold.', 'narr'); }
+  else { o2 -= 8; if(inj>=1 || steady() < 62){ inj++; o2 -= 12; await say('My legs give out on the slope. I fall, get up, fall again, and I do not know how much air is left in the tank.', 'narr'); } else await say('I go straight up the rim on legs I do not trust, and reach the top before I can change my mind.', 'narr'); }
+  runHud(o2, inj, sample);
+  if(dead()){
+    await say(o2<=0 ? 'The suit gauge reads zero, and I am still forty metres from the door.' : 'Something breaks in me that no suit can fix.', 'narr');
+    $('#runhud').classList.remove('on'); return;
+  }
+  shot('surface', true);
+  await say('The airlock door opens, and I fall through it, and it closes behind me.', 'narr');
+  $('#runhud').classList.remove('on');
+  W.sample = sample; W.injury = inj; S.injury = inj;
+  W.morale = Math.max(0, Math.min(100, W.morale + (sample==='good' ? 8 : 0) - inj*4));
+  S.log.push('Ice run: sample ' + sample + ', injury ' + inj + ', ' + Math.round(o2) + ' oxygen left');
+  await fadeTo(true, 1200); setScene('hab'); showHab(); await fadeTo(false, 1400);
+  if(sample==='good') await say('The sample sits on the console in its little steel tube. It is the reason we all came, and I am too tired to feel it.', 'narr');
+  else if(sample==='poor') await say('The sample sits on the console, small and grey. Somebody on Earth will call it a start.', 'narr');
+  else await say('There is nothing on the console but my empty hands.', 'narr');
+  clearCaption();
+}
+async function day9After(){
+  await say('The message arrives just before midnight. It is not a call. It is a file, forty seconds long, the kind you can only play once before the link goes.', 'narr');
+  await say('“Commander, a voice message from Earth. It is from Mimi.”', 'okafor');
+  playFile('mimi', 1);   /* Mimi's ONE real voice recording goes in audio/mimi-voice.mp3 */
+  const bond = S.bond;
+  if(bond >= 6){
+    await say('“Hi. It’s me. Grandma Hana says I have to keep this short because it costs money by the second, so. I’m okay. I planted the beans she gave me on the windowsill. They need light and water and warmth, and I told her that’s just like your farm. Come back. Not before my birthday. That already happened. Just come back.”', 'mimi');
+  } else if(bond >= 3){
+    await say('“Hi. It’s Mimi. Grandma Hana says I should say something. I’m okay. I did my homework. …Are you okay? …Okay. Bye.”', 'mimi');
+  } else {
+    await say('“Hi. This is Mimi. Grandma Hana said. I’m fine.”', 'mimi');
+    await say('He is fine in a way that costs him everything.', 'narr');
+  }
+  if(S.birthday==='lie') await say('“You said you’d save a slice. I saved you a slice. It went bad. Grandma Hana said I could throw it away. I didn’t. I’m not going to.”', 'mimi');
+  else if(S.birthday==='truth') await say('“Thank you for telling me the truth. I was really sad. But I’m not sad about that.”', 'mimi');
+  else if(S.birthday==='skip') await say('“You didn’t call. That’s okay. Grandma Hana said you were busy saving the Moon.”', 'mimi');
+  await say('The message ends. The link, as always, drops in the middle of nothing.', 'narr');
+  clearCaption();
+  await writeLog(9, [
+    'I found the ice. I found out what I am made of. I am not sure which was harder.',
+    'Ice run complete. Sample logged. Hull patched. Suit oxygen low.',
+    'Day 9: Mimi’s voice, forty seconds long. It is the best thing I have ever heard.'
+  ], ['honest','factual','hopeful'], [
+    'I write it slowly. The pen is not quite steady.',
+    'Accurate. It leaves out the forty seconds.',
+    'I play the file once more before I write it, and then I cannot play it again.'
+  ]);
+}
+
+function packCards(){
+  const cards = [
+    {id:'pk_min', dec:'pack', label:'Only the sample and the mission log', why:'Light, and safest for the ascent.', h:1, p:0, line:'I pack the ice and the log into the return capsule, and nothing else.'}
+  ];
+  if(W.breach!=='closed') cards.push({id:'pk_seed', dec:'pack', label:'The sample, the log, and a seedling for Mimi', why:'Heavier by a little. It is the only living thing I can bring him.', h:2, p:0, set:{seedling:true}, extra:'Mimi will like this',
+    line:'I pot one of the crop tray’s bean seedlings in a cup, and strap it in beside the ice.'});
+  cards.push({id:'pk_leave', dec:'pack', label:'Leave the sample behind', why:'The lightest ascent of all. The mission comes home with nothing.', h:0, p:0, set:{sample:'none'}, extra:'Empty-handed',
+    line:'I leave the ice in the freezer. It is the heaviest decision I have made.'});
+  return cards;
+}
+function ascentCards(){
+  return [
+    {id:'as_full', dec:'ascent', label:'Full ascent checks, every system twice', why:'Slow. The ascent stage gets exactly one chance.', h:3, p:1, set:{ascent:'full'}, extra:'Safest launch',
+      line:'I check the ascent stage twice, every valve and every connector, and then a third time out of pure fear.'},
+    {id:'as_quick', dec:'ascent', label:'Quick checks', why:'The obvious systems only.', h:1, p:0, set:{ascent:'quick'}},
+    {id:'as_skip', dec:'ascent', label:'Trust the stage', why:'No hours spent. Nothing checked.', h:0, p:0, set:{ascent:'none'}}
+  ];
+}
+function doorScene(mx, ms){
+  $('#doorMimi').setAttribute('transform','translate('+mx+' 660) scale('+ms+')');
+}
+function endingFinal(title){
+  const T = {
+    'Perfect Margin':'Every system held. The sample was the best the agency had ever received, nobody was hurt, and every number you were told was true. The margin held, and so did you.',
+    'Walked Home':'You walked out of the capsule on your own two feet. The mission was called a success in public and a mixed result in private. Mimi counted the days, and he counted right.',
+    'Carried Home':'You came home on a stretcher, and you came home. The doctors said the leg would heal. Mimi walked beside you the whole way, holding the edge of the blanket.',
+    'Shy Distance':'You came home safe, and it was not simple. It took weeks, and a great many quiet afternoons on the back step, before Mimi sat down beside you again.',
+    'The Brave Voice':'The first thing you heard on Earth was a small voice shouting your name across a runway. He was brave in public, exactly as the letter asked. Afterwards, in your arms, he was not, and that was better.',
+    'The Honest Maybe':'You told him you could not promise, and you told him the truth on his birthday. He remembered both. “You said maybe,” he said. “Maybe came true.”',
+    'The Record':'The mission log was released, unedited. Schoolchildren read it in classrooms. Some of the lines made them laugh, and a few made them stop talking. Mimi read every one, including the ones that were only for you.'
+  };
+  let t = T[title] || '';
+  if(S.seedling) t += ' Mimi planted the seedling on the kitchen windowsill. It lived.';
+  t += S.figurine ? ' The little astronaut came home in your pocket, and went straight back on Mimi’s shelf.' : ' The little astronaut was already on Mimi’s shelf, waiting.';
+  return t;
+}
+const ENDING_SEQ = {
+  'Perfect Margin':{ mx:800, ms:1.5, lines:[
+    ['Every system held. The sample is the best they have ever seen, and nobody is hurt.','narr'],
+    ['Dr. Okafor meets me at the recovery dock with nothing in his hands. No clipboard. “Every number was real,” he says.','narr'],
+    ['Mimi is at the door before I am out of the car, with a slice of cake wrapped in foil, held in both hands.','narr'],
+    ['“You took your time.”','hana'],
+    ['And then, quieter: “Good.”','hana']]},
+  'Walked Home':{ mx:790, ms:1.3, lines:[
+    ['I walk out of the capsule on my own legs. It takes everything I have, and nobody has to hold me up.','narr'],
+    ['The sample is whatever it is. The agency will call the mission a success in public and a mixed result in private.','narr'],
+    ['Mimi stands very straight next to Grandma Hana, like a person practising being brave.','narr'],
+    ['I kneel so we are the same height. “I’m home.”','you'],
+    ['“I know,” he says. “I counted.”','mimi']]},
+  'Carried Home':{ mx:760, ms:1.25, lines:[
+    ['I do not walk out of the capsule. Two people in white carry me, and I let them, which is its own kind of surrender.','narr'],
+    ['“The leg will heal,” the doctor says. “The rest depends on you.”','narr'],
+    ['Mimi walks beside the stretcher, holding the edge of the blanket as if it might blow away.','narr'],
+    ['“You look terrible,” says Grandma Hana.','hana'],
+    ['“Thank you.” “You are home.”','hana']]},
+  'Shy Distance':{ mx:650, ms:1.0, lines:[
+    ['The capsule opens on a bright afternoon. I am home, and I am safe, and nothing is simple.','narr'],
+    ['Mimi stands behind Grandma Hana, one hand holding her sleeve.','narr'],
+    ['He looks at me the way you look at someone you missed so much that you learned to live without them.','narr'],
+    ['I do not rush him. I sit down on the front step.','narr'],
+    ['After a very long time, he sits down at the other end of it.','narr']]},
+  'The Brave Voice':{ mx:930, ms:1.0, lines:[
+    ['The first thing I hear on Earth is a small voice shouting, across an entire runway, at the top of its lungs: “YOU’RE BACK!”','narr'],
+    ['He is brave in front of everyone, exactly as the letter told him to be.','narr'],
+    ['Then he reaches me, and stops being brave, and cries into my jacket.','narr'],
+    ['It is the best thing that has ever happened to me.','narr']]},
+  'The Honest Maybe':{ mx:860, ms:1.3, lines:[
+    ['I told him I could not promise. I told him the truth on his birthday.','narr'],
+    ['He is waiting at the door, not running, hands at his sides.','narr'],
+    ['“You said maybe.”','mimi'],
+    ['“I did.”','you'],
+    ['“Maybe came true.”','mimi']]},
+  'The Record':{ mx:850, ms:1.2, lines:[
+    ['They released the log eight weeks later, unedited.','narr'],
+    ['Schoolchildren read it in classrooms. Some of the lines made them laugh. A few made them stop talking.','narr'],
+    ['Mimi has read every line, including the ones that were only for me. He will not say which one he liked best.','narr'],
+    ['Grandma Hana keeps the book on the kitchen shelf, between the rice and the tea.','narr']]}
+};
+function honestLogCount(){ return S.logLines.filter(l=>['honest','uneasy'].indexOf(l.kind)>=0).length; }
+function chooseEnding(){
+  if(W.sample==='none') return 'Empty-Handed';
+  if((S.injury||0) >= 2) return 'Carried Home';
+  const minSys = Math.min(W.air, W.battery, W.shield, W.food);
+  if(W.sample==='good' && (S.injury||0)===0 && !S.radSick && minSys >= 40 && S.trust >= 0 && S.birthday!=='skip') return 'Perfect Margin';
+  if(S.letter==='brave' && S.bond >= 4) return 'The Brave Voice';
+  if(S.letter==='honest' && (S.promise==='honest' || S.birthday==='truth')) return 'The Honest Maybe';
+  if(honestLogCount() >= 4) return 'The Record';
+  if(S.bond <= 3) return 'Shy Distance';
+  return 'Walked Home';
+}
+async function day10Open(){
+  const spec = DAYS[10];
+  W.seedling = false; W.ascent = 'none';
+  await fadeTo(true, 1600);
+  showHab();
+  await dayCard(10, 'Pack Up and Launch');
+  await fadeTo(false, 1800);
+  await say('Ten days. The habitat feels smaller and larger than it did, both at once.', 'narr');
+  if(W.habOff===true) await say('The ring in the ceiling is dark. I pack by the light of my own lamp.', 'narr');
+  await habReport();
+  await say('“Ascent window opens tomorrow at dawn,” Dr. Okafor says. “The stage needs a healthy battery, and a Commander who can climb the ladder.”', 'okafor');
+  spec.problem = ['pack','ascent'];
+  clearCaption();
+}
+async function day10After(){
+  await writeLog(10, [
+    'Ten days. I did not do it perfectly. I did it honestly.',
+    'Pack-up complete. Ascent stage prepared. Habitat secured.',
+    'Day 10: the Moon gave me everything except a reason to stay.'
+  ], ['honest','factual','hopeful'], [
+    'I sign the last line. The pen is steady, for the first time in a week.',
+    'Accurate. A good last line for someone else to read.',
+    'I close the log. It closes easily, like a door that knows the way.'
+  ]);
+  /* ---- the ascent ---- */
+  S.seedling = !!W.seedling;
+  const sc = W.battery + (W.ascent==='full' ? 15 : (W.ascent==='quick' ? 5 : 0)) - (W.seedling ? 4 : 0) + (W.sample==='none' ? 8 : 0) - (S.injury||0)*8 - (W.breach==='patched' ? 4 : 0);
+  S.log.push('Ascent score ' + sc);
+  await say('Dawn. The ascent stage waits on its pad, the last thing I have to trust.', 'narr');
+  if(W.habOff===true) await say('The ring in the ceiling is dark. I whisper “thank you” to it anyway.', 'narr');
+  else if(W.habPact==='honest') await say('“Ascent stage is go,” HAB says. “Every number I give you is true. It has been an honour, Commander.”', 'hab');
+  else { await say('“Ascent stage is go, Commander. For the record, I would do it again.”', 'hab'); await say('I believe it. That is the problem, and it is also the point.', 'narr'); }
+  clearCaption();
+  if(sc < 20){
+    W.dead = 'The Long Dark';
+    W.deadText = 'The ascent stage woke, flickered, and went dark. You could not power it. You sat in the habitat with the lights failing, one by one, and waited for a rescue that arrived, at last, too late.';
+    await say('The stage coughs. The lights drop to amber, then to red, then out.', 'narr');
+    await say('I sit in the dark and I count, and I am still counting when the count runs out.', 'narr');
+    clearCaption();
+    return;
+  }
+  sfx.launch(); shake = 7;
+  await say('Three. Two. One.', 'narr');
+  if(sc < 35){
+    S.injury = (S.injury||0) + 1;
+    await say('The stage lights, and the world hits me in the back. It is a rough ascent. Something in me does not survive it intact.', 'narr');
+  } else {
+    await say('The stage lights, and the ladder of light goes up and up. It is the smoothest thing the Moon has ever done for me.', 'narr');
+  }
+  await tween(900, (e)=>{ shake = 7*(1-e); }); shake = 0;
+  await say('Below me, the habitat is a small white smudge on a grey plain. Beside it is a line of footprints that will last a million years.', 'narr');
+  clearCaption();
+
+  /* ---- the ending ---- */
+  const title = chooseEnding();
+  if(title==='Empty-Handed'){
+    await fadeTo(true, 1600); setScene('door'); doorScene(800, 1.4); shot('door', true); await fadeTo(false, 1800);
+    await say('The cargo hold is empty. The log is full.', 'narr');
+    await say('Mimi is at the door. He does not ask about the Moon. He asks if I am hungry.', 'narr');
+    clearCaption();
+    endCard(title, emptyHandedText());
+    return;
+  }
+  const seq = ENDING_SEQ[title];
+  await fadeTo(true, 1800); setScene('door'); doorScene(seq.mx, seq.ms); shot('door', true); await fadeTo(false, 2200);
+  for(const L of seq.lines) await say(L[0], L[1]);
+  clearCaption();
+  endCard(title, endingFinal(title));
+}
+
+const DAYS = {
+  1:{ n:1, title:'Landing', hours:12, power:10, twin:false, problem:null, open:day1Open, cards:(d)=>cardsFor(d),
+      note:'Real crews plan power, crew time and supplies together, because spending one always draws on another. What is left over is called a margin.' },
+  2:{ n:2, title:'Small Leaks', hours:10, power:10, twin:true, problem:'leak', open:day2Open, after:day2After,
+      cards:(d)=> d==='leak' ? leakCards() : cardsFor(d),
+      note:'Spare parts cost fuel to launch, so planners bring only the ones whose failure would hurt most. A quick patch buys time. It does not remove the risk.' },
+  3:{ n:3, title:'The Long Shadow', hours:12, power:6, twin:false, problem:'shadow', open:day3Open, after:day3After, figMorale:true,
+      cards:(d)=>{
+        if(d==='shadow') return shadowCards();
+        const c = cardsFor(d);
+        if(d==='power') return c.map(x=> x.id==='pow_full' ? Object.assign({}, x, {fx:{battery:8}, why:'The Sun is so low that even a perfect array gives less.'})
+                                 : (x.id==='pow_quick' ? Object.assign({}, x, {fx:{battery:3}}) : x));
+        return c;
+      },
+      note:'Real lunar missions have to survive long shadows and lunar night on stored power, so planners decide in advance what to switch off. Turning something off on purpose is a plan, not a failure.' },
+  4:{ n:4, title:'Dust', hours:12, power:10, twin:true, problem:'dust', open:day4Open, after:day4After,
+      cards:(d)=> d==='dust' ? dustCards() : (d==='leak' ? leakCards() : cardsFor(d)),
+      note:'Lunar dust is sharp, sticky and clings by static electricity. It wears seals, clogs filters and dims solar panels, so planners treat it as a design problem and not just a chore.' },
+  5:{ n:5, title:'The Fault', hours:12, power:10, twin:true, problem:'jam', open:day5Open, after:day5After,
+      cards:(d)=> d==='jam' ? jamCards() : (d==='dust' ? dustCards() : (d==='leak' ? leakCards() : cardsFor(d))),
+      note:'A machine that reports its own health can be wrong, so real crews cross-check anything life-critical against an independent reading. A number you cannot verify is a guess.' },
+  6:{ n:6, title:'Birthday', hours:12, power:10, twin:true, problem:'call', open:day6Open, after:day6After,
+      cards:(d)=> d==='call' ? callCards() : (d==='jam' ? jamCards() : (d==='dust' ? dustCards() : (d==='leak' ? leakCards() : cardsFor(d)))),
+      note:'Real crews schedule calls home like any other task, because morale is a resource too. Long isolation and missed events at home are recognised strains, so planners protect time for family contact.' },
+  7:{ n:7, title:'The Advisory', hours:12, power:10, twin:true, problem:'filter', open:day7Open, after:day7After,
+      cards:(d)=> d==='filter' ? filterCards() : (d==='call' ? callCards() : (d==='jam' ? jamCards() : (d==='dust' ? dustCards() : (d==='leak' ? leakCards() : cardsFor(d))))),
+      note:'A crew that hides a problem to avoid worrying the ground, or a ground team that hides a margin to avoid worrying the crew, is the classic way a small fault becomes a large one. Real operations depend on people saying the number out loud.' },
+  8:{ n:8, title:'The Flare', hours:12, power:10, twin:false, problem:['shelter','stock'], open:day8Open, after:day8After, nightTitle:'Before the storm, Day 8',
+      cards:(d)=> d==='shelter' ? shelterCards() : (d==='stock' ? stockCards() : cardsFor(d)),
+      note:'Solar particle events can be far more dangerous than the routine radiation of the Moon, and the warning can be short. Real mission planners rely on shelter, distance and time in the shelter, and pre-position supplies so nobody has to go outside during the worst of it.' },
+  9:{ n:9, title:'The Breach', hours:12, power:10, twin:true, problem:['breach','prep'], open:day9Open, mid:day9Mid, after:day9After,
+      cards:(d)=> d==='breach' ? breachCards() : (d==='prep' ? prepCards() : cardsFor(d)),
+      note:'Every kilometre of a moonwalk is paid for in oxygen, time and radiation dose, so planners work backwards from the return trip and never spend the last of the margin on the way out. The rule of thumb is to turn back while there is still a comfortable amount left.' },
+  10:{ n:10, title:'Pack Up and Launch', hours:12, power:10, twin:true, problem:['pack','ascent'], open:day10Open, after:day10After,
+      cards:(d)=> d==='pack' ? packCards() : (d==='ascent' ? ascentCards() : cardsFor(d)),
+      note:'The vehicle that takes a crew home is the one thing that must work the first time. Planners keep the ascent stage’s power separate and protected, and they weigh every kilogram of cargo against the margin of the climb.' }
+};
+
+async function narratePlan(plan){
+  const ordered = plan.slice().sort((a,b)=> (['pack','ascent','breach','prep','shelter','stock','filter','call','jam','leak','shadow','dust'].indexOf(b.dec)>=0?1:0) - (['pack','ascent','breach','prep','shelter','stock','filter','call','jam','leak','shadow','dust'].indexOf(a.dec)>=0?1:0));
+  const lines = ordered.filter(c=>c.line).map(c=>c.line).slice(0,3);
+  await say(lines.length ? 'The day goes the way I planned it.' : 'I let the day pass without touching much.', 'narr');
+  for(const l of lines) await say(l, 'narr');
+  clearCaption();
+}
+
+async function runOutpost(startDay){
+  if(startDay && SNAPS[startDay]) restoreSnap(startDay); else { resetWorld(); SNAPS = {}; }
+  for(const n of [1,2,3,4,5,6,7,8,9,10].filter(d=>d>=(startDay||1))){
+    const spec = DAYS[n];
+    W.day = n; W.twinUsed = false;
+    SNAPS[n] = JSON.stringify({W:W, S:S});
+    await spec.open();
+    if(W.ended){ endCard(W.ended, emptyHandedText()); return; }
+    const hf = hoursFor(spec);
+    const day = Object.assign({}, spec, {hours:hf.hours, tired:hf.tired});
+    const plan = await planUI(day);
+    await narratePlan(plan);
+    if(spec.mid){ await spec.mid(plan); if(W.dead){ endCard(W.dead, deathText(W.dead)); return; } }
+    const before = reportedState();
+    const r = simulate(plan, day, false);
+    Object.keys(r.w).forEach(k=>{ W[k] = r.w[k]; });
+    await nightScreen(day, before, reportedState(), r.lines);
+    if(W.dead){ endCard(W.dead, deathText(W.dead)); return; }
+    if(day.after) await day.after();
+    if(W.dead){ endCard(W.dead, deathText(W.dead)); return; }
+    if(n===10) return;
+  }
+  endCard('The end.', 'You reached the end of the mission.');
+}
+
+/* ---------- endings: what you have found, and where to look ---------- */
+const ENDINGS = {
+  'Perfect Margin':{type:'Survival', hint:'Come home with a clean sample, no injuries, every system healthy, and no promise to Mimi broken.'},
+  'Walked Home':{type:'Survival', hint:'Come home on your own feet, but not quite perfectly.'},
+  'Carried Home':{type:'Survival', hint:'Get badly hurt on the ice run or the ascent, and come home on a stretcher.'},
+  'Shy Distance':{type:'Survival', hint:'Come home safe, but let your bond with Mimi wither first.'},
+  'The Brave Voice':{type:'Survival', hint:'Write Mimi the brave letter, and keep your bond with him strong.'},
+  'The Honest Maybe':{type:'Survival', hint:'Write the honest letter, and tell Mimi the truth when it matters.'},
+  'Empty-Handed':{type:'Survival', hint:'Tell Okafor the truth about your health on Day 7 and accept the order home. Or leave the sample behind on Day 10.'},
+  'The Record':{type:'Survival', hint:'Fill the mission log with honest lines.'},
+  'The Long Dark':{type:'Death', hint:'Let the air or the battery run out, or fail to power the ascent.'},
+  'The Storm':{type:'Death', hint:'Meet the solar flare on Day 8 without enough shielding.'},
+  'The Ice Run':{type:'Death', hint:'Lose your oxygen or your footing on the walk on Day 9.'},
+  'HAB’s Last Word':{type:'Death', hint:'Enter the storm on Day 8 with too little power in the battery.'}
+};
+const ENDKEY = 'hm_endings_v1'; let MEM_END = [];
+function loadEndings(){ try{ const v = JSON.parse(localStorage.getItem(ENDKEY) || '[]'); if(Array.isArray(v)) return v; }catch(e){} return MEM_END.slice(); }
+function saveEndings(a){ MEM_END = a.slice(); try{ localStorage.setItem(ENDKEY, JSON.stringify(a)); }catch(e){} }
+function recordEnding(title){
+  if(!ENDINGS[title]) return false;
+  const a = loadEndings(); if(a.indexOf(title)>=0) return false;
+  a.push(title); saveEndings(a); return true;
+}
+function showEndings(){
+  const found = loadEndings();
+  $('#endCount').textContent = 'You have found '+found.length+' of 12. Survival endings are about how you come home. Deaths are where the simulation can defeat you.';
+  const list = $('#endList'); list.innerHTML = '';
+  ['Survival','Death'].forEach((type)=>{
+    list.appendChild(el('div','egroup', type==='Survival' ? 'COMING HOME' : 'NOT COMING HOME'));
+    Object.keys(ENDINGS).filter(k=>ENDINGS[k].type===type).forEach((k)=>{
+      const ok = found.indexOf(k)>=0, row = el('div','erow '+(ok?'found':'locked')), left = el('div');
+      left.appendChild(el('div','en', ok ? k : '???')); left.appendChild(el('div','ed', ENDINGS[k].hint));
+      row.appendChild(left); row.appendChild(el('div','et', ok ? 'Found' : 'Not yet')); list.appendChild(row);
+    });
+  });
+  show('#end', false); show('#endings', true);
+}
+function showReplay(){
+  const list = $('#replayList'); list.innerHTML = '';
+  Object.keys(SNAPS).map(Number).sort((a,b)=>a-b).forEach((n)=>{
+    const b = el('button','rrow','Day '+n+': '+DAYS[n].title); b.type='button';
+    b.onclick = async ()=>{
+      show('#replay', false); show('#end', false);
+      await fadeTo(true, 700); resetScene();
+      await runOutpost(n);
+    };
+    list.appendChild(b);
+  });
+  if(!list.children.length) list.appendChild(el('p','lede','Nothing to replay yet.'));
+  show('#end', false); show('#replay', true);
+}
+$('#endBack').onclick = ()=>{ show('#endings', false); show('#end', true); };
+$('#replayBack').onclick = ()=>{ show('#replay', false); show('#end', true); };
+$('#endingsBtn').onclick = showEndings;
+$('#replayBtn').onclick = showReplay;
+let SNAPS = {};
+function restoreSnap(n){
+  const snap = JSON.parse(SNAPS[n]);
+  Object.keys(W).forEach(k=>{ delete W[k]; }); Object.assign(W, snap.W);
+  Object.keys(S).forEach(k=>{ delete S[k]; }); Object.assign(S, snap.S);
+}
+
+function endCard(title, text){
+  const isNew = title ? recordEnding(title) : false;
+  if(title) $('#endTitle').textContent = title;
+  if(text) $('#endText').textContent = text;
+  show('#end', true);
+  $('#endFound').textContent = ENDINGS[title] ? ((isNew ? 'New ending. ' : '') + 'Endings found: '+loadEndings().length+' of 12') : '';
+  const sc=$('#scores'); sc.classList.remove('on');
+  $('#showScores').onclick = ()=>{
+    sc.innerHTML = 'Bond with Mimi: ' + S.bond + '<br>Trust: ' + S.trust + '<br>Promise: ' + S.promise + '<br>Figurine: ' + (S.figurine ? 'kept' : 'left behind') + '<br>Letter: ' + S.letter + '<br>Outpost after the last day: air ' + W.air + ', battery ' + W.battery + ', shielding ' + W.shield + ', food ' + W.food + '<br>Your choices: ' + S.log.join('; ') + '.';
+    sc.classList.add('on');
+  };
+  $('#again').onclick = async ()=>{
+    show('#end', false); await fadeTo(true, 800);
+    await lastMorning();
+  };
+}
+
+(async function main(){
+  await titleSequence();
+  await profile();
+  await lastMorning();
+})();
+
+})();
+</script>
+</body>
+</html>
